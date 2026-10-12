@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>うらないの部屋</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site">
+    <h1>🔮 うらないの部屋</h1>
+    <p class="sub">家族まとめて、四柱推命・九星気学・西洋占星術で見ます</p>
+  </header>
+
+  <main>
+    <section id="kazoku">
+      <div id="k-input">
+        <div class="card">
+          <p class="k-lead">家族みんなの名前と生年月日を入れてな。ひとりずつの性格、2人ずつの関係、家族全体として「こんな家」が出ます。</p>
+          <div id="k-people" class="k-people"></div>
+          <button type="button" id="k-add" class="ghost k-add">＋ 人を足す</button>
+          <p id="k-msg" class="msg" role="alert"></p>
+          <button type="button" id="k-go" class="primary">家族まとめて占う</button>
+        </div>
+      </div>
+      <div id="k-result" hidden>
+        <section id="k-qr" class="card k-qr ipad-only">
+          <div id="k-qr-img" class="k-qr-img" aria-label="結果のQRコード"></div>
+          <div class="k-qr-text">
+            <h2>ケータイのカメラで読みとってください</h2>
+            <p>結果がケータイに出ます。そのページをブックマークしとけば、いつでも見返せます。</p>
+            <p class="k-qr-note">QRコードには生年月日と名前だけが入ってて、占いはケータイの中で計算します。生年月日はどこのサーバーにも送られません。</p>
+            <p id="k-qr-msg" class="msg" role="status"></p>
+          </div>
+        </section>
+        <div class="k-next ipad-only">
+          <button type="button" id="k-next" class="ghost">次のお客さんへ（入力を全部消す）</button>
+          <div id="k-next-confirm" class="k-next-confirm" hidden>
+            <span>名前と生年月日を全部消して、最初の画面にもどります。</span>
+            <button type="button" id="k-next-yes" class="primary">消す</button>
+            <button type="button" id="k-next-no" class="ghost">やめる</button>
+          </div>
+        </div>
+
+        <div class="phone-only k-dl card">
+          <h2>占いの結果をダウンロードしてください</h2>
+          <p class="k-dl-names" id="k-dl-names"></p>
+          <button type="button" id="k-dl" class="primary k-dl-btn">結果をダウンロード</button>
+          <p class="k-dl-size" id="k-dl-size"></p>
+          <div id="k-dl-done" class="k-dl-done" hidden>
+            <p><b>ダウンロードしました。</b>このページは閉じて大丈夫です。</p>
+            <p class="k-dl-where">iPhone：「ファイル」アプリの「ダウンロード」フォルダ<br>Android：「ダウンロード」フォルダ</p>
+          </div>
+          <details class="k-dl-help">
+            <summary>ダウンロードできへんときは</summary>
+            <p>LINE などのアプリの中で開いてると、ダウンロードできへんことがあります。右上のメニューから「Safariで開く」「ブラウザで開く」を選ぶか、下のボタンで文章をコピーしてメモに貼りつけてください。</p>
+            <button type="button" id="k-copy" class="ghost">結果の文章をコピー</button>
+            <p id="k-copy-msg" class="k-dl-where" role="status"></p>
+            <textarea id="k-copy-text" class="k-copy-text" rows="8" readonly hidden></textarea>
+          </details>
+        </div>
+        <div class="k-actions ipad-only">
+          <button type="button" id="k-back" class="ghost k-back">← 入力にもどる</button>
+        </div>
+        <article id="k-result-body" class="k-report"></article>
+        <div class="k-actions ipad-only">
+          <button type="button" id="k-back2" class="ghost k-back">← 入力にもどる</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>※ 占いはエンタメです。四柱推命・九星気学・西洋占星術の決まりごとから計算してますが、科学的根拠はありません。大事な判断はデータと自分の頭で。</p>
+  </footer>
+
+  <script src="family.js"></script>
+</body>
+</html>
