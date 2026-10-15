@@ -69,12 +69,12 @@ node check.js     # 「問題なし」になること
 - [x] 占いの計算と検証、関西弁レポート、QR → ケータイでテキストをダウンロードする流れ
 - [x] GitHub に push 済み（ブランチ `claude/fortune-telling-app-czkdno`）
 - [ ] **GitHub Pages の公開**：リポジトリの Settings → Pages → Source「Deploy from a branch」→ Branch `claude/fortune-telling-app-czkdno`・`/ (root)` → Save。公開後に `https://mochiaiochiai-collab.github.io/claude/` が開くか、QR からケータイでダウンロードまで通るかを確認する
-- [ ] **新しいデザインをアプリに反映**：Figma「うらないの部屋 UI」 https://www.figma.com/design/lqojDwkLotKxQJgp0Usisi
-  - ① iPad 入力（左に入力行、右にテンキーと「家族まとめて占う」を常に表示）
-  - ② iPad QR（左に大きい QR、右に結果のあらましと「次のお客さんへ」）
-  - ③④ ケータイのダウンロード画面（押す前・押した後）
-  - 色は Figma の変数「うらない/色」（ライト固定）。**OS がダークモードでも暗くしない**（`color-scheme: light` で固定）。今のアプリは暗い紫なので作り直しが必要
-  - フォント：見出し Shippori Mincho、本文とボタン Zen Maru Gothic（Google Fonts）
+- [x] **新しいデザインをアプリに反映**（Figma「うらないの部屋 UI」 https://www.figma.com/design/lqojDwkLotKxQJgp0Usisi ）
+  - iPad ①入力（左に入力行、右にテンキーと「家族まとめて占う」を常に表示）／②QR（左に QR、右に結果のあらましと「次のお客さんへ」）／ケータイ③④ダウンロード（押す前・押した後）
+  - 色は `style.css` の `:root` に Figma の変数「うらない/色」をそのまま入れてある。`color-scheme: light` で固定
+  - フォントは Figma のデザインメモどおり、全部 Zen Maru Gothic（Google Fonts）。ケータイも読み込むので通信は約29KBより増える
+  - iPad は1画面に収める（高さが足りないときはテンキーが縮む）。結果の長いレポートは画面には出さず、ケータイのテキストファイルだけに入る
+  - **要確認**：Figma の変数（文字 #40a948 など黄緑系）とデザインメモ（文字は濃い紫 #2A2140、背景ほぼ白）が食い違ってる。屋外で読めるかは実機で見て、`:root` の値を差し替える
 - [ ] 当日のリハーサル：iPad を GitHub Pages の URL で開く → テザリングを切っても占いと QR が出るか → iPhone と Android でダウンロードできるか
 
 ## 当日の運用メモ

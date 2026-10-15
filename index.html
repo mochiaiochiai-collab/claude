@@ -3,75 +3,122 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
   <title>うらないの部屋</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <header class="site">
-    <h1>🔮 うらないの部屋</h1>
-    <p class="sub">家族まとめて、四柱推命・九星気学・西洋占星術で見ます</p>
+<body data-step="1">
+  <header class="site ipad-only">
+    <div class="site-title">
+      <h1>うらないの部屋</h1>
+      <p class="sub">家族まとめて、四柱推命・九星気学・西洋占星術で見ます</p>
+    </div>
+    <ol class="steps" aria-label="いまの段階">
+      <li class="step step-1">① 入力</li>
+      <li class="step step-2">② 占う</li>
+      <li class="step step-3">③ QRで受け取り</li>
+    </ol>
   </header>
+  <h1 class="phone-title phone-only">うらないの部屋</h1>
 
-  <main>
-    <section id="kazoku">
-      <div id="k-input">
-        <div class="card">
-          <p class="k-lead">家族みんなの名前と生年月日を入れてな。ひとりずつの性格、2人ずつの関係、家族全体として「こんな家」が出ます。</p>
-          <div id="k-people" class="k-people"></div>
-          <button type="button" id="k-add" class="ghost k-add">＋ 人を足す</button>
-          <p id="k-msg" class="msg" role="alert"></p>
-          <button type="button" id="k-go" class="primary">家族まとめて占う</button>
-        </div>
+  <main id="kazoku">
+    <!-- iPad ①：入力 -->
+    <section id="k-input" class="k-input">
+      <div class="k-left">
+        <h2 class="k-head">家族の名前と生年月日を入れてください</h2>
+        <p class="k-lead">名前はニックネームでOK。生年月日の欄をタップして、右のテンキーで8桁入れます。</p>
+        <div id="k-people" class="k-people"></div>
+        <button type="button" id="k-add" class="btn secondary k-add">＋ 人を足す（10人まで）</button>
+        <div class="k-spacer"></div>
+        <p class="k-foot">※ 占いはエンタメです。生年月日はこのiPadとお客さんのケータイの中だけで使い、どこにも送りません。</p>
       </div>
-      <div id="k-result" hidden>
-        <section id="k-qr" class="card k-qr ipad-only">
-          <div id="k-qr-img" class="k-qr-img" aria-label="結果のQRコード"></div>
-          <div class="k-qr-text">
-            <h2>ケータイのカメラで読みとってください</h2>
-            <p>結果がケータイに出ます。そのページをブックマークしとけば、いつでも見返せます。</p>
-            <p class="k-qr-note">QRコードには生年月日と名前だけが入ってて、占いはケータイの中で計算します。生年月日はどこのサーバーにも送られません。</p>
-            <p id="k-qr-msg" class="msg" role="status"></p>
+
+      <aside class="k-pad" aria-label="生年月日のテンキー">
+        <div class="k-pad-top">
+          <p id="k-pad-label" class="k-pad-label"></p>
+          <div id="k-pad-disp" class="k-pad-disp" aria-live="polite"></div>
+          <p class="k-pad-hint">西暦・月・日の順に8桁。例：2013年4月1日 → 20130401</p>
+          <p id="k-pad-msg" class="msg" role="alert"></p>
+        </div>
+        <div class="k-pad-bottom">
+          <div class="k-keys" role="group" aria-label="数字">
+            <button type="button" class="k-key" data-k="1">1</button>
+            <button type="button" class="k-key" data-k="2">2</button>
+            <button type="button" class="k-key" data-k="3">3</button>
+            <button type="button" class="k-key" data-k="4">4</button>
+            <button type="button" class="k-key" data-k="5">5</button>
+            <button type="button" class="k-key" data-k="6">6</button>
+            <button type="button" class="k-key" data-k="7">7</button>
+            <button type="button" class="k-key" data-k="8">8</button>
+            <button type="button" class="k-key" data-k="9">9</button>
+            <button type="button" class="k-key sub" data-k="clear">クリア</button>
+            <button type="button" class="k-key" data-k="0">0</button>
+            <button type="button" class="k-key sub" data-k="back" aria-label="1文字消す">⌫</button>
           </div>
-        </section>
-        <div class="k-next ipad-only">
-          <button type="button" id="k-next" class="ghost">次のお客さんへ（入力を全部消す）</button>
+          <p id="k-msg" class="msg" role="alert"></p>
+          <button type="button" id="k-go" class="btn primary">家族まとめて占う</button>
+        </div>
+      </aside>
+    </section>
+
+    <section id="k-result" class="k-result" hidden>
+      <!-- iPad ②：QR -->
+      <div class="k-qrcard ipad-only">
+        <h2>ケータイのカメラで<br>読みとってください</h2>
+        <div id="k-qr-img" class="k-qr-img" aria-label="結果のQRコード"></div>
+        <p class="k-qr-lead">読みとると「結果をダウンロード」の画面が出ます</p>
+        <div class="k-spacer"></div>
+        <p id="k-qr-msg" class="msg" role="status"></p>
+        <p class="k-qr-note">QRコードに入ってるのは生年月日と名前だけ。占いはケータイの中で計算するので、どこのサーバーにも送られません。</p>
+      </div>
+
+      <div class="k-side ipad-only">
+        <div class="k-summary">
+          <p class="k-sum-n" id="k-sum-n"></p>
+          <p class="k-sum-title" id="k-sum-title"></p>
+          <p class="k-sum-text" id="k-sum-text"></p>
+          <div class="k-sum-list" id="k-sum-list"></div>
+        </div>
+        <div class="k-spacer"></div>
+        <div class="k-staff">
+          <p class="k-staff-note">お客さんの画面に「ダウンロードしました」が出たのを確かめてから押してください</p>
+          <button type="button" id="k-next" class="btn primary">次のお客さんへ（入力を全部消す）</button>
           <div id="k-next-confirm" class="k-next-confirm" hidden>
             <span>名前と生年月日を全部消して、最初の画面にもどります。</span>
-            <button type="button" id="k-next-yes" class="primary">消す</button>
-            <button type="button" id="k-next-no" class="ghost">やめる</button>
+            <button type="button" id="k-next-yes" class="btn primary">消す</button>
+            <button type="button" id="k-next-no" class="btn secondary">やめる</button>
           </div>
+          <button type="button" id="k-back" class="btn secondary">← 入力にもどる（直したいとき）</button>
         </div>
+      </div>
 
-        <div class="phone-only k-dl card">
-          <h2>占いの結果をダウンロードしてください</h2>
-          <p class="k-dl-names" id="k-dl-names"></p>
-          <button type="button" id="k-dl" class="primary k-dl-btn">結果をダウンロード</button>
-          <p class="k-dl-size" id="k-dl-size"></p>
-          <div id="k-dl-done" class="k-dl-done" hidden>
-            <p><b>ダウンロードしました。</b>このページは閉じて大丈夫です。</p>
-            <p class="k-dl-where">iPhone：「ファイル」アプリの「ダウンロード」フォルダ<br>Android：「ダウンロード」フォルダ</p>
-          </div>
-          <details class="k-dl-help">
-            <summary>ダウンロードできへんときは</summary>
-            <p>LINE などのアプリの中で開いてると、ダウンロードできへんことがあります。右上のメニューから「Safariで開く」「ブラウザで開く」を選ぶか、下のボタンで文章をコピーしてメモに貼りつけてください。</p>
-            <button type="button" id="k-copy" class="ghost">結果の文章をコピー</button>
-            <p id="k-copy-msg" class="k-dl-where" role="status"></p>
-            <textarea id="k-copy-text" class="k-copy-text" rows="8" readonly hidden></textarea>
-          </details>
+      <!-- ケータイ：ダウンロード -->
+      <div class="phone-only k-dl">
+        <h2>占いの結果を<br>ダウンロードしてください</h2>
+        <p class="k-dl-names" id="k-dl-names"></p>
+        <button type="button" id="k-dl" class="btn primary">結果をダウンロード</button>
+        <p class="k-dl-size" id="k-dl-size"></p>
+        <div id="k-dl-done" class="k-dl-done" hidden>
+          <p class="k-dl-ok">✓ ダウンロードしました</p>
+          <p class="k-dl-close">このページは閉じて大丈夫です。</p>
+          <p class="k-dl-where">iPhone：ファイル ＞ ダウンロード<br>Android：ダウンロード フォルダ</p>
         </div>
-        <div class="k-actions ipad-only">
-          <button type="button" id="k-back" class="ghost k-back">← 入力にもどる</button>
-        </div>
-        <article id="k-result-body" class="k-report"></article>
-        <div class="k-actions ipad-only">
-          <button type="button" id="k-back2" class="ghost k-back">← 入力にもどる</button>
-        </div>
+        <details class="k-dl-help">
+          <summary>ダウンロードできないときは ＞</summary>
+          <p>LINE などのアプリの中で開いてると、ダウンロードできへんことがあります。右上のメニューから「Safariで開く」「ブラウザで開く」を選ぶか、下のボタンで文章をコピーしてメモに貼りつけてください。</p>
+          <button type="button" id="k-copy" class="btn secondary">結果の文章をコピー</button>
+          <p id="k-copy-msg" class="k-dl-where" role="status"></p>
+          <textarea id="k-copy-text" class="k-copy-text" rows="8" readonly hidden></textarea>
+        </details>
       </div>
     </section>
   </main>
 
-  <footer>
-    <p>※ 占いはエンタメです。四柱推命・九星気学・西洋占星術の決まりごとから計算してますが、科学的根拠はありません。大事な判断はデータと自分の頭で。</p>
+  <footer class="phone-only">
+    <p>※ 占いはエンタメです。科学的根拠はありません。</p>
   </footer>
 
   <script src="family.js"></script>

@@ -929,49 +929,67 @@
     // iPad 側：通信が切れても QR が出せるように、開いた時点で QR の部品を読み込んでおく
     loadQr(doc).catch(() => {});
 
+    const blank = () => [0, 1, 2, 3].map(() => ({ name: '', digits: '' }));
     let people;
     try { people = JSON.parse(localStorage.getItem(STORE)); } catch { people = null; }
-    if (!Array.isArray(people) || people.length < 2) people = [0, 1, 2, 3].map(() => ({ name: '', digits: '' }));
-    let active = -1;
+    if (!Array.isArray(people) || people.length < 2) people = blank();
+    // from 番目以降で、まだ生年月日が入ってへない最初の人（なければ -1）
+    const firstOpen = from => people.findIndex((q, j) => j >= from && q.digits.length < 8);
+    let active = firstOpen(0);
     const save = () => { try { localStorage.setItem(STORE, JSON.stringify(people)); } catch { /* 保存できへん環境でも動く */ } };
+    const step = n => { doc.body.dataset.step = String(n); };
 
     const shown = digits => {
       const s = digits.padEnd(8, '_');
-      return `${s.slice(0, 4)}/${s.slice(4, 6)}/${s.slice(6, 8)}`;
+      return `${s.slice(0, 4)} / ${s.slice(4, 6)} / ${s.slice(6, 8)}`;
     };
+    const dateOk = p => p.digits.length === 8 && !!parseDigits(p.digits);
 
+    // 人の数が変わったときだけ作り直す（入力中の名前欄を壊さへんため）
     function render() {
       $('k-people').innerHTML = people.map((p, i) => `
-        <div class="k-row${i === active ? ' open' : ''}" data-i="${i}">
-          <div class="k-row-head">
-            <span class="k-num">${i + 1}人目</span>
-            ${people.length > 2 ? `<button type="button" class="k-del" data-i="${i}" aria-label="${i + 1}人目を消す">消す</button>` : ''}
-          </div>
-          <input id="k-name-${i}" class="k-name" data-i="${i}" type="text" maxlength="12" placeholder="名前（なんでもええで）" value="${esc(p.name)}">
-          <button type="button" id="k-date-${i}" class="k-date${p.digits.length === 8 ? ' done' : ''}" data-i="${i}">
-            <span class="k-date-l">生年月日</span><span class="k-date-v">${shown(p.digits)}</span>
+        <div class="k-row" data-i="${i}">
+          <span class="k-num">${i + 1}人目</span>
+          <input id="k-name-${i}" class="k-name" data-i="${i}" type="text" maxlength="12" placeholder="名前（なんでもOK）" value="${esc(p.name)}">
+          <button type="button" id="k-date-${i}" class="k-date" data-i="${i}">
+            <span class="k-date-l">生年月日</span><span class="k-date-v"></span>
           </button>
-          ${i === active ? `
-          <div class="k-pad" role="group" aria-label="生年月日を数字で入力">
-            <p class="k-pad-hint">西暦・月・日を8桁で。例：2013年4月1日 → 20130401</p>
-            <p id="k-pad-msg" class="msg" role="alert"></p>
-            <div class="k-keys">
-              ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button type="button" class="k-key" data-k="${n}">${n}</button>`).join('')}
-              <button type="button" class="k-key sub" data-k="clear">クリア</button>
-              <button type="button" class="k-key" data-k="0">0</button>
-              <button type="button" class="k-key sub" data-k="back" aria-label="1文字消す">⌫</button>
-            </div>
-          </div>` : ''}
+          ${people.length > 2 ? `<button type="button" class="k-del" data-i="${i}" aria-label="${i + 1}人目を消す">消す</button>` : ''}
         </div>`).join('');
       $('k-add').disabled = people.length >= MAX_PEOPLE;
-      $('k-add').textContent = people.length >= MAX_PEOPLE ? `${MAX_PEOPLE}人までやで` : '＋ 人を足す';
+      $('k-add').textContent = people.length >= MAX_PEOPLE ? `${MAX_PEOPLE}人までやで` : `＋ 人を足す（${MAX_PEOPLE}人まで）`;
+      paint();
+    }
+
+    // 行の色・日付・テンキーの表示だけを更新する
+    function paint() {
+      people.forEach((p, i) => {
+        const row = $('k-people').children[i];
+        row.classList.toggle('open', i === active);
+        row.classList.toggle('done', dateOk(p));
+        row.querySelector('.k-date-v').textContent = shown(p.digits);
+      });
+      const a = people[active];
+      const nm = a && a.name.trim();
+      $('k-pad-label').textContent = a ? `${active + 1}人目${nm ? `（${nm}）` : ''}の生年月日` : '生年月日を入れる人の行をタップしてください';
+      $('k-pad-disp').textContent = shown(a ? a.digits : '');
+    }
+
+    function setActive(i) {
+      if (i === active) return;
+      active = i;
+      $('k-pad-msg').textContent = '';
+      paint();
     }
 
     $('k-people').addEventListener('input', e => {
       if (e.target.classList.contains('k-name')) {
         people[Number(e.target.dataset.i)].name = e.target.value;
-        save();
+        save(); paint();
       }
+    });
+    $('k-people').addEventListener('focusin', e => {
+      if (e.target.classList.contains('k-name')) setActive(Number(e.target.dataset.i));
     });
 
     $('k-people').addEventListener('click', e => {
@@ -979,41 +997,39 @@
       if (!t) return;
       if (t.classList.contains('k-del')) {
         people.splice(Number(t.dataset.i), 1);
-        active = -1;
+        active = firstOpen(0);
+        $('k-pad-msg').textContent = '';
         save(); render();
         return;
       }
-      if (t.classList.contains('k-date')) {
-        active = Number(t.dataset.i);
-        render();
-        return;
-      }
-      if (t.classList.contains('k-key')) {
-        const p = people[active];
-        const k = t.dataset.k;
-        if (k === 'clear') p.digits = '';
-        else if (k === 'back') p.digits = p.digits.slice(0, -1);
-        else if (p.digits.length < 8) p.digits += k;
-        save();
+      if (t.classList.contains('k-date')) setActive(Number(t.dataset.i));
+    });
 
-        if (p.digits.length === 8) {
-          if (!parseDigits(p.digits)) {
-            const row = $(`k-date-${active}`);
-            row.querySelector('.k-date-v').textContent = shown(p.digits);
-            $('k-pad-msg').textContent = 'その日付はないみたいやで。1900年以降の、今日までの日付を入れてな';
-            return;
-          }
-          // 次のまだ入ってへん人へ進む
-          const next = people.findIndex((q, j) => j > active && q.digits.length < 8);
-          active = next;
-          render();
-          if (next >= 0) $(`k-date-${next}`).scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    doc.querySelector('.k-keys').addEventListener('click', e => {
+      const t = e.target.closest('.k-key');
+      if (!t || active < 0) return;
+      const p = people[active];
+      const k = t.dataset.k;
+      $('k-pad-msg').textContent = '';
+      if (k === 'clear') p.digits = '';
+      else if (k === 'back') p.digits = p.digits.slice(0, -1);
+      else if (p.digits.length < 8) p.digits += k;
+      save();
+
+      if (p.digits.length === 8) {
+        if (!parseDigits(p.digits)) {
+          paint();
+          $('k-pad-msg').textContent = 'その日付はないみたいやで。1900年以降の、今日までの日付を入れてな';
           return;
         }
-        $(`k-date-${active}`).querySelector('.k-date-v').textContent = shown(p.digits);
-        $(`k-date-${active}`).classList.toggle('done', false);
-        $('k-pad-msg').textContent = '';
+        // 次のまだ入ってへん人へ進む
+        const next = firstOpen(active + 1);
+        active = next >= 0 ? next : firstOpen(0);
+        paint();
+        if (active >= 0) $(`k-date-${active}`).scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return;
       }
+      paint();
     });
 
     $('k-add').addEventListener('click', () => {
@@ -1032,12 +1048,22 @@
       if (filled.length < 2) { msg.textContent = '2人以上の生年月日を入れてな'; return; }
       msg.textContent = '';
       const list = filled.map(p => ({ name: p.name.trim() || `${p.i + 1}人目`, date: parseDigits(p.digits) }));
-      $('k-result-body').innerHTML = renderReport(familyReading(list));
+      showSummary(familyReading(list));
       $('k-input').hidden = true;
       $('k-result').hidden = false;
-      $('k-result').scrollIntoView({ block: 'start' });
+      step(3);
+      window.scrollTo(0, 0);
       showQr(encodeShare(list));
     });
+
+    // 結果のあらまし（くわしい文章はケータイのファイルに入ってる）
+    function showSummary(r) {
+      $('k-sum-n').textContent = `${r.charts.length}人の家族は`;
+      $('k-sum-title').textContent = r.house.title;
+      $('k-sum-text').textContent = r.house.strong;
+      $('k-sum-list').innerHTML = r.charts.map(c => `
+        <div class="k-sum-row"><b>${esc(c.name)}</b><span>${pillarStr(c.p.day)}</span><span>${KYUSEI[c.kyusei][0]}${c.p.risshunDay ? '※' : ''}</span><span>${c.sun.name}${c.sunAlt ? '※' : ''}</span></div>`).join('');
+    }
 
     function showQr(token) {
       const url = shareUrl(token);
@@ -1057,27 +1083,25 @@
     const back = () => {
       $('k-result').hidden = true;
       $('k-input').hidden = false;
-      $('k-input').scrollIntoView({ block: 'start' });
+      step(1);
+      window.scrollTo(0, 0);
     };
     $('k-back').addEventListener('click', back);
 
     // 次のお客さんへ：入力と結果を全部消す（イベントで前の人のデータが見えへんように）
-    if ($('k-next')) {
-      $('k-next').addEventListener('click', () => { $('k-next-confirm').hidden = false; });
-      $('k-next-no').addEventListener('click', () => { $('k-next-confirm').hidden = true; });
-      $('k-next-yes').addEventListener('click', () => {
-        people = [0, 1, 2, 3].map(() => ({ name: '', digits: '' }));
-        active = -1;
-        try { localStorage.removeItem(STORE); } catch { /* 保存できへん環境 */ }
-        $('k-result-body').innerHTML = '';
-        $('k-next-confirm').hidden = true;
-        $('k-qr-img').innerHTML = '';
-        render();
-        back();
-        window.scrollTo(0, 0);
-      });
-    }
-    $('k-back2').addEventListener('click', back);
+    $('k-next').addEventListener('click', () => { $('k-next-confirm').hidden = false; });
+    $('k-next-no').addEventListener('click', () => { $('k-next-confirm').hidden = true; });
+    $('k-next-yes').addEventListener('click', () => {
+      people = blank();
+      active = 0;
+      try { localStorage.removeItem(STORE); } catch { /* 保存できへん環境 */ }
+      $('k-sum-list').innerHTML = '';
+      $('k-next-confirm').hidden = true;
+      $('k-qr-img').innerHTML = '';
+      $('k-pad-msg').textContent = '';
+      render();
+      back();
+    });
 
     render();
   }
