@@ -77,6 +77,8 @@ node check.js     # 「問題なし」になること
   - iPad は 1366×1024 の固定ステージを画面に合わせて拡大縮小（`--s`）。Figma と同じ配置のまま収まる。家族が多い時は一覧、結果の表だけがスクロール
   - ケータイは 390 幅が基準。キャラクターや雲は `assets/` の SVG（Figma から書き出し）。キャラは全部不透明100%（SVG の opacity を外してある。ブレンドは multiply のまま。目や口などの水色のパーツは通常ブレンド）
   - 結果ファイル（HTML）のデザインは Figma の「ケータイ／結果90×可変」。緑の雲は Figma の形（`assets/r-cloud.png`、487×408 の2倍）を CSS の border-image で9分割して伸ばしてる。画面の端まで出して切る（余白なし）。フォントは Noto Sans JP・Rubik Bubbles・Angkor を Google Fonts から読む（オフラインで開くと本文はヒラギノ等に切り替わる）
+  - ケータイ③：タイトル → 名前のチップ（水色の丸、縦に並べる）→「結果はダウンロードされます」→ キャラと Download の雲。③④の部品の位置は Figma（4:98・4:109）の座標のまま
+  - 結果ファイルの雲は、Figma の各ブロックの座標・余白をそのまま写してある（雲の幅は 487／530／713px、画面の中央に置いて端を切る、キャラは雲の下に重ねる、ブロックの間は115px）
   - Back は1文字消す（空なら一覧にもどる）。OK で確定。ニックネームを確定して生年月日が空なら、そのまま生年月日の画面へ進む
   - 色は `style.css` の `:root` に Figma の変数をそのまま入れてある（暗い紫の1モード、`color-scheme: dark` 固定）。フォントは Rubik Bubbles（タイトル）・Angkor（数字）・Noto Sans JP（本文。日本語は全部これ。Figma も同じ）を Google Fonts から読む。デザインの Toppan Bunkyu は配布の許可が要るので Noto Sans JP Black で代用
   - デザイン側の「Downroad」は typo と見て「Download」にしてある

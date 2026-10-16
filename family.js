@@ -885,7 +885,7 @@
     const kids = gens.length >= 2 ? gens[gens.length - 1] : [];
     const e = esc;
     const img = (k, cls) => (art[k] ? `<img class="${cls}" src="${art[k]}" alt="">` : '');
-    const cloudCss = art.cloud ? `.top,.gc{background:none;border-radius:0;border-image:url(${art.cloud}) 220 260 220 260 fill/110px 130px 110px 130px stretch}.top{border-image-width:100px 118px 100px 118px}.gc.big{border-image-width:160px 190px 160px 190px}.gc.mid{border-image-width:120px 142px 120px 142px}` : '';
+    const cloudCss = art.cloud ? `.gc{background:none;border-radius:0;border-image-source:url(${art.cloud});border-image-slice:220 260 220 260 fill;border-image-repeat:stretch;border-image-width:110px 130px 110px 130px}.gc.b{border-image-width:120px 142px 120px 142px}.gc.c{border-image-width:161px 190px 161px 190px}` : '';
 
     // ---- 見どころ ----
     const facts = [];
@@ -971,89 +971,94 @@
         <div class="box"><small>九星気学</small><p>${t.nine}</p></div>
         <div class="box"><small>西洋占星術</small><p>${t.west}</p></div></section>`;
     }).join('');
-    const timeline = buckets.map(bk => `<section class="tc${bk === peak && score(peak) >= 2 ? ' peak' : ''}"><h3>${bk.label}</h3>${bk.rows.map(x => `<div class="tr"><small>${e(x.c.name)}　${x.age}</small><b>${PHASE[x.key][0]}${x.ky ? '　★節目' : ''}</b></div>`).join('')}</section>`).join('');
+    const timeline = buckets.map(bk => `<section class="tc"><h3>${bk.label}${bk === peak && score(peak) >= 2 ? '　家族の山場' : ''}</h3>${bk.rows.map(x => `<div class="tr"><small>${e(x.c.name)}　${x.age}</small><b>${PHASE[x.key][0]}${x.ky ? '　★節目' : ''}</b></div>`).join('')}</section>`).join('');
     const growCards = charts.map(c => `<section class="gw"><small>${e(c.name)}</small><p>${growth(c)}</p></section>`).join('');
 
+    const tipsHtml = tips.map((t, i) => `<p>${i + 1}. ${t}</p>`).join('');
     return `<!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Family fortune</title>
+<title>Family Fortune</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Angkor&family=Rubik+Bubbles&family=Noto+Sans+JP:wght@400;700&display=swap">
 <style>${RESULT_CSS}${cloudCss}</style></head>
 <body><main>
-<header class="top"><h1>Family<br>fortune</h1>${img('bat', 'bat')}</header>
+<header class="top">${art.cloud ? `<img class="hc" src="${art.cloud}" alt="">` : ''}<h1>Family<br>Fortune</h1>${img('bat', 'bat')}</header>
 <p class="warn">占いはエンタメです。科学的根拠はありません。<br>そしてAIは間違ってるかもしれません！</p>
+<div class="col">
 <div class="chips">${names.map(n => `<span>${n}</span>`).join('')}</div>
 <ol class="toc"><li>３つの占いの視点からあぶり出す個性</li><li>これから10年の流れ</li><li>これからどう育ってく？？</li><li>円満・開運ポイント</li></ol>
 <section class="lead"><p>ひとことでいうと・・・この家は・・・</p><h2>${e(r.house.title)}</h2></section>
-${img('m1', 'mon m1')}
-<div class="sh"><span class="no">1.</span><h2>３つの占いからあぶり出す個性</h2></div>
-${people}
-<div class="gc"><small>ここが見どころ</small><p>${facts.slice(0, 2).join('')}</p></div>
-${img('m2', 'mon m2')}
-<div class="sh"><span class="no">2.</span><h2>これから10年の流れ</h2></div>
+<section class="sec"><div class="sh"><span class="no">1.</span><h2>３つの占いからあぶり出す個性</h2></div>${people}</section>
+</div>
+<div class="gc a"><small>ここが見どころ</small><p>${facts.slice(0, 2).join('')}</p>${img('m2', 'gm m2')}</div>
+<section class="blk sec"><div class="sh"><span class="no">2.</span><h2>これから10年の流れ</h2></div>
 <p class="note">立春から次の立春までを1年として並べました。★は九星の節目（9年にいっぺんの区切り）です。</p>
-${timeline}
-<div class="gc mid"><small>${e(peakTitle)}</small><p>${peakText}</p></div>
-${img('m3', 'mon m3')}
-<div class="sh"><span class="no">3.</span><h2>これからどう育ってく？？</h2></div>
+${timeline}</section>
+<div class="gc b"><small>${e(peakTitle)}</small><p>${peakText}</p>${img('m3', 'gm m3')}</div>
+<section class="blk sec"><div class="sh"><span class="no">3.</span><h2>これからどう育ってく？？</h2></div>
 <section class="flow"><small>${flowHead}</small><b>${flowLine}</b><p>${flowTail}</p></section>
 ${growCards}
-<section class="caution"><small>一個だけ注意</small><p>${warnText}</p></section>
-<div class="gc big tips"><div class="sh"><span class="no">4.</span><h2>円満・開運ポイント</h2></div><ol>${tips.map(t => `<li>${t}</li>`).join('')}</ol></div>
-<footer>${img('bottom', 'mon mb')}<p class="date">${made}</p></footer>
+<section class="caution"><small>一個だけ注意</small><p>${warnText}</p></section></section>
+<div class="blk"><div class="gc c"><div class="sh"><span class="no">4.</span><h2>円満・開運ポイント</h2></div>${tipsHtml}${img('bottom', 'gm mb')}</div>
+<p class="date">${made}</p></div>
 </main></body></html>`;
   }
 
   const RESULT_CSS = `
-.top,.gc{background:#09ab00;border-radius:46px}
 *{box-sizing:border-box}html{background:#2d1f4e}
-body{margin:0;background:#2d1f4e;color:#fff;font:700 16px/1.6 "Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;-webkit-text-size-adjust:100%}
-main{max-width:430px;margin:0 auto;padding:0 20px 40px;overflow-x:hidden}
+body{margin:0;background:#2d1f4e;color:#fff;font:700 16px/25px "Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:430px;margin:0 auto;padding:0 20px 39px;overflow-x:hidden}
 h1,h2,h3,p,ol,ul{margin:0}
-small{display:block;font-size:13px;color:#656565}
-.top{position:relative;margin:-60px -60px 0;padding:88px 80px 96px;text-align:center}
-.top h1{position:relative;font:400 44px/1.15 "Rubik Bubbles","Noto Sans JP",sans-serif;letter-spacing:1px}
-.bat{position:absolute;left:70px;bottom:-22px;width:125px;height:auto;z-index:2}
-.warn{margin-top:72px;text-align:center;color:#ff0084;font-size:14px}
-.chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:24px 0}
-.chips span{background:#60e6fd;color:#2d1f4e;border-radius:999px;padding:2px 14px;font-size:15px}
-.toc{padding-left:42px;margin:28px 0}
-.toc li{padding:1px 0}
-.lead{background:#1a0a3f;border-radius:28px;padding:20px;margin:32px 0}
-.lead p{font-size:15px}
-.lead h2{color:#60e6fd;font-size:28px;line-height:1.3;margin-top:8px}
-.mon{display:block;margin:24px auto 0;height:auto}.m1{width:74px}.m2{width:150px}.m3{width:158px}.mb{width:147px}
-.sh{display:flex;align-items:flex-end;gap:12px;margin:12px 0}
-.sh .no{font:400 30px/1.2 "Rubik Bubbles","Noto Sans JP",sans-serif}
-.sh h2{font-size:20px;line-height:1.4;padding-bottom:4px}
-.pc{background:#1a0a3f;border-radius:24px;padding:20px;margin:12px 0}
-.pc h3{color:#60e6fd;font-size:22px;line-height:1.3}
-.pc .one{font-size:18px;margin:2px 0 12px}
-.box{background:#fff;color:#2d1f4e;border-radius:14px;padding:10px 14px;margin-top:12px}
+small{display:block;font-size:13px;line-height:20px;color:#656565}
+.top{position:relative;height:234px;margin:0 -20px}
+.hc{position:absolute;left:50%;margin-left:-167px;top:-97px;width:347px;height:291px}
+.top h1{position:absolute;left:50%;margin-left:-167px;top:26px;width:347px;text-align:center;font:400 40px/44px "Rubik Bubbles","Noto Sans JP",sans-serif}
+.bat{position:absolute;left:50%;margin-left:-158px;top:114px;width:124px;height:auto}
+.warn{text-align:center;color:#ff0084;font-size:14px;line-height:22px}
+.col{margin-top:46px;display:flex;flex-direction:column;gap:32px}
+.chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.chips span{background:#60e6fd;color:#2d1f4e;border-radius:999px;padding:2px 14px;font-size:15px;line-height:23px}
+.toc{padding:0 20px 0 40px}
+.lead{background:#1a0a3f;border-radius:28px;padding:20px}
+.lead p{font-size:15px;line-height:23px}
+.lead h2{color:#60e6fd;font-size:28px;line-height:36px;margin-top:8px}
+.sec{display:flex;flex-direction:column;gap:12px}
+.blk{margin-top:115px}
+.sh{display:flex;align-items:center;gap:12px;padding-left:10px;min-height:42px}
+.sh .no{font:400 30px/42px "Rubik Bubbles","Noto Sans JP",sans-serif}
+.sh h2{font-size:20px;line-height:28px}
+.pc{background:#1a0a3f;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.pc h3{color:#60e6fd;font-size:22px;line-height:29px}
+.pc .one{font-size:18px;line-height:25px;margin-top:-10px}
+.box{background:#fff;color:#2d1f4e;border-radius:14px;padding:10px 14px}
 .box p{margin-top:2px}
-.gc{position:relative;margin:48px -68.5px;padding:84px 94px 85px;border:0 solid transparent}
-.gc.big{margin:48px -181.5px;padding:117px 181px 171px}
-.gc.mid{margin:48px -90px;padding:92px 116px 92px}
-.gc small{color:#fff;font-size:14px}.gc p{font-size:18px;margin-top:2px}
-.note{font-weight:400;margin:4px 0 12px}
-.tc{background:#1a0a3f;border-radius:20px;padding:16px;margin:12px 0}
-.tc.peak{outline:2px solid #60e6fd}
-.tc h3{color:#60e6fd;font-size:18px;margin-bottom:10px}
-.tr{background:#fff;color:#2d1f4e;border-radius:12px;padding:8px 12px;margin-top:10px}
-.tr b{display:block;font-size:17px;line-height:1.4}
-.flow{background:rgba(255,255,255,.2);border-radius:20px;padding:16px;margin:12px 0}
-.flow small{color:#fff;font-size:14px}.flow b{display:block;color:#60e6fd;font-size:18px;line-height:1.5;margin:6px 0}
+.gc{position:relative;display:block;background:#09ab00;border-radius:46px}
+.gc small{color:#fff;font-size:16.63px;line-height:26px}
+.gc p{font-size:20.44px;line-height:32px;margin-top:8.4px}
+.gm{position:absolute;height:auto}
+.gc.a{width:487px;margin-left:calc(50% - 243.5px);min-height:408px;padding:106px 94.5px 0}
+.gm.m2{left:78px;top:334px;width:151px}
+.gc.b{width:530px;margin-left:calc(50% - 265px);margin-bottom:30px;min-height:444px;padding:106px 116px 0}
+.gm.m3{left:280px;top:360px;width:134px}
+.gc.c{width:713px;margin:-5px 0 101px calc(50% - 356.5px);min-height:598px;padding:117px 181.5px 0}
+.gc.c .sh{padding-left:10px;margin-bottom:12px}
+.gc.c p{font-size:17px;line-height:26px;margin:0 0 12px}
+.gm.mb{left:341px;top:475px;width:147px}
+.note{font-weight:400;font-size:15px;line-height:23px}
+.tc{background:#1a0a3f;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.tc h3{color:#60e6fd;font-size:18px;line-height:25px}
+.tr{background:#fff;color:#2d1f4e;border-radius:12px;padding:8px 12px}
+.tr small{font-size:13px;line-height:20px}
+.tr b{display:block;font-size:17px;line-height:24px}
+.flow{background:rgba(255,255,255,.2);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.flow small{color:#fff;font-size:14px;line-height:22px}
+.flow b{display:block;color:#60e6fd;font-size:18px;line-height:27px}
 .flow p{font-weight:400}
-.gw{background:#fff;color:#2d1f4e;border-radius:20px;padding:16px;margin:12px 0}
-.gw p{margin-top:4px}
-.caution{border:2px solid #60e6fd;border-radius:20px;padding:16px;margin:12px 0}
-.caution small{color:#60e6fd;font-size:14px}.caution p{margin-top:6px}
-.tips .sh{margin:0 0 8px}.tips ol{padding-left:24px;margin-top:8px}.tips li{font-size:17px;margin:10px 0}
-.tips .no{font-size:30px}
-footer{text-align:center;margin-top:20px}
-.date{font:400 14px/1.6 "Angkor","Noto Sans JP",sans-serif;margin-top:20px}
+.gw{background:#fff;color:#2d1f4e;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:4px}
+.caution{border:2px solid #60e6fd;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.caution small{color:#60e6fd;font-size:14px;line-height:22px}
+.date{font:400 14px/22px "Angkor","Noto Sans JP",sans-serif;text-align:center}
 `;
 
   // ---------- QRコード用：生年月日と名前をURLの「#」の後ろに入れる ----------
