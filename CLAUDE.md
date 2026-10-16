@@ -23,7 +23,7 @@ Claude Code（クラウド）で作ってきたものを、デスクトップの
 | ファイル | 中身 |
 |---|---|
 | `family.js` | 暦・天文計算、占いの判定、結果HTML（`resultHtml`）の組み立て、QR 用の符号化、入力 UI、ケータイ用画面。node でも require できる |
-| `result-art.js` | 結果HTMLに埋め込むキャラ5体（`assets/r-*.png` を base64 にしたもの）。ケータイでダウンロードを押す前に読み込む。作り直すときは `assets/r-*.png` を差し替えて、各 png を `data:image/png;base64,…` にして `window.RESULT_ART` の `bat / m1 / m2 / m3 / bottom` に入れる |
+| `result-art.js` | 結果HTMLに埋め込むキャラ5体と緑の雲の形（`assets/r-*.png` を base64 にしたもの。`bat / m1 / m2 / m3 / bottom / cloud`）。ケータイでダウンロードを押す前に読み込む。作り直すときは `assets/r-*.png` を差し替えて、各 png を `data:image/png;base64,…` にして `window.RESULT_ART` の `bat / m1 / m2 / m3 / bottom` に入れる |
 | `index.html` / `style.css` / `assets/` | 画面。iPad 用（`ipad-only`）とケータイ用（`body.phone` のとき `phone-only`）を出し分け。`assets/` は Figma から書き出したキャラクターと雲の SVG |
 | `vendor/qrcode.js` | qrcode-generator 2.0.4（MIT）。iPad 側だけで読み込む |
 | `test.js` | テスト。`node test.js` |
@@ -75,7 +75,7 @@ node check.js     # 「問題なし」になること
   - 流れ：① 一覧（家族の行をタップ）→ ② ニックネーム（ひらがなキーボード、゛゜小つき）→ ③ 生年月日（数字10個）→ 一覧で「Let's Fortune !」→ ④ 結果案内（結果のあらましと QR、「Close」で全部消して最初へ）。ケータイは「Download」→「Saved !」
   - iPad は 1366×1024 の固定ステージを画面に合わせて拡大縮小（`--s`）。Figma と同じ配置のまま収まる。家族が多い時は一覧、結果の表だけがスクロール
   - ケータイは 390 幅が基準。キャラクターや雲は `assets/` の SVG（Figma から書き出し）。キャラは全部不透明100%（SVG の opacity を外してある。ブレンドは multiply のまま。目や口などの水色のパーツは通常ブレンド）
-  - 結果ファイル（HTML）のデザインは Figma の「ケータイ／結果90×可変」。緑の雲は CSS の円（radial-gradient）で作ってる。フォントは Noto Sans JP・Rubik Bubbles・Angkor を Google Fonts から読む（オフラインで開くと本文はヒラギノ等に切り替わる）
+  - 結果ファイル（HTML）のデザインは Figma の「ケータイ／結果90×可変」。緑の雲は Figma の形（`assets/r-cloud.png`、487×408 の2倍）を CSS の border-image で9分割して伸ばしてる。画面の端まで出して切る（余白なし）。フォントは Noto Sans JP・Rubik Bubbles・Angkor を Google Fonts から読む（オフラインで開くと本文はヒラギノ等に切り替わる）
   - Back は1文字消す（空なら一覧にもどる）。OK で確定。ニックネームを確定して生年月日が空なら、そのまま生年月日の画面へ進む
   - 色は `style.css` の `:root` に Figma の変数をそのまま入れてある（暗い紫の1モード、`color-scheme: dark` 固定）。フォントは Rubik Bubbles（タイトル）・Angkor（数字）・Noto Sans JP（本文。日本語は全部これ。Figma も同じ）を Google Fonts から読む。デザインの Toppan Bunkyu は配布の許可が要るので Noto Sans JP Black で代用
   - デザイン側の「Downroad」は typo と見て「Download」にしてある

@@ -885,6 +885,7 @@
     const kids = gens.length >= 2 ? gens[gens.length - 1] : [];
     const e = esc;
     const img = (k, cls) => (art[k] ? `<img class="${cls}" src="${art[k]}" alt="">` : '');
+    const cloudCss = art.cloud ? `.top,.gc{background:none;border-radius:0;border-image:url(${art.cloud}) 220 260 220 260 fill/110px 130px 110px 130px stretch}.top{border-image-width:100px 118px 100px 118px}.gc.big{border-image-width:160px 190px 160px 190px}.gc.mid{border-image-width:120px 142px 120px 142px}` : '';
 
     // ---- 見どころ ----
     const facts = [];
@@ -979,42 +980,42 @@
 <meta name="color-scheme" content="dark">
 <title>Family fortune</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Angkor&family=Rubik+Bubbles&family=Noto+Sans+JP:wght@400;700&display=swap">
-<style>${RESULT_CSS}</style></head>
+<style>${RESULT_CSS}${cloudCss}</style></head>
 <body><main>
 <header class="top"><h1>Family<br>fortune</h1>${img('bat', 'bat')}</header>
 <p class="warn">占いはエンタメです。科学的根拠はありません。<br>そしてAIは間違ってるかもしれません！</p>
 <div class="chips">${names.map(n => `<span>${n}</span>`).join('')}</div>
 <ol class="toc"><li>３つの占いの視点からあぶり出す個性</li><li>これから10年の流れ</li><li>これからどう育ってく？？</li><li>円満・開運ポイント</li></ol>
 <section class="lead"><p>ひとことでいうと・・・この家は・・・</p><h2>${e(r.house.title)}</h2></section>
-${img('m1', 'mon')}
+${img('m1', 'mon m1')}
 <div class="sh"><span class="no">1.</span><h2>３つの占いからあぶり出す個性</h2></div>
 ${people}
 <div class="gc"><small>ここが見どころ</small><p>${facts.slice(0, 2).join('')}</p></div>
-${img('m2', 'mon')}
+${img('m2', 'mon m2')}
 <div class="sh"><span class="no">2.</span><h2>これから10年の流れ</h2></div>
 <p class="note">立春から次の立春までを1年として並べました。★は九星の節目（9年にいっぺんの区切り）です。</p>
 ${timeline}
-<div class="gc"><small>${e(peakTitle)}</small><p>${peakText}</p></div>
-${img('m3', 'mon')}
+<div class="gc mid"><small>${e(peakTitle)}</small><p>${peakText}</p></div>
+${img('m3', 'mon m3')}
 <div class="sh"><span class="no">3.</span><h2>これからどう育ってく？？</h2></div>
 <section class="flow"><small>${flowHead}</small><b>${flowLine}</b><p>${flowTail}</p></section>
 ${growCards}
 <section class="caution"><small>一個だけ注意</small><p>${warnText}</p></section>
-<div class="gc tips"><div class="sh"><span class="no">4.</span><h2>円満・開運ポイント</h2></div><ol>${tips.map(t => `<li>${t}</li>`).join('')}</ol></div>
-<footer>${img('bottom', 'mon')}<p class="date">${made}</p></footer>
+<div class="gc big tips"><div class="sh"><span class="no">4.</span><h2>円満・開運ポイント</h2></div><ol>${tips.map(t => `<li>${t}</li>`).join('')}</ol></div>
+<footer>${img('bottom', 'mon mb')}<p class="date">${made}</p></footer>
 </main></body></html>`;
   }
 
   const RESULT_CSS = `
+.top,.gc{background:#09ab00;border-radius:46px}
 *{box-sizing:border-box}html{background:#2d1f4e}
 body{margin:0;background:#2d1f4e;color:#fff;font:700 16px/1.6 "Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;-webkit-text-size-adjust:100%}
 main{max-width:430px;margin:0 auto;padding:0 20px 40px;overflow-x:hidden}
 h1,h2,h3,p,ol,ul{margin:0}
 small{display:block;font-size:13px;color:#656565}
-.top{position:relative;margin:0 -20px;padding:48px 20px 56px;background:#09ab00;border-radius:0 0 54px 54px;text-align:center;min-height:210px}
-.top::after{content:"";position:absolute;left:30px;right:30px;bottom:-46px;height:60px;background:radial-gradient(circle at 28px 30px,#09ab00 0 28px,transparent 29px) 0 0/90px 60px round no-repeat,radial-gradient(circle at 70px 24px,#09ab00 0 20px,transparent 21px) 0 0/90px 60px round no-repeat}
-.top h1{font:400 44px/1.15 "Rubik Bubbles","Noto Sans JP",sans-serif;letter-spacing:1px}
-.bat{position:absolute;left:10px;top:148px;width:104px;z-index:2}
+.top{position:relative;margin:-60px -60px 0;padding:88px 80px 96px;text-align:center}
+.top h1{position:relative;font:400 44px/1.15 "Rubik Bubbles","Noto Sans JP",sans-serif;letter-spacing:1px}
+.bat{position:absolute;left:70px;bottom:-22px;width:125px;height:auto;z-index:2}
 .warn{margin-top:72px;text-align:center;color:#ff0084;font-size:14px}
 .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:24px 0}
 .chips span{background:#60e6fd;color:#2d1f4e;border-radius:999px;padding:2px 14px;font-size:15px}
@@ -1023,7 +1024,7 @@ small{display:block;font-size:13px;color:#656565}
 .lead{background:#1a0a3f;border-radius:28px;padding:20px;margin:32px 0}
 .lead p{font-size:15px}
 .lead h2{color:#60e6fd;font-size:28px;line-height:1.3;margin-top:8px}
-.mon{display:block;margin:28px auto 4px;max-width:150px;height:auto}
+.mon{display:block;margin:24px auto 0;height:auto}.m1{width:74px}.m2{width:150px}.m3{width:158px}.mb{width:147px}
 .sh{display:flex;align-items:flex-end;gap:12px;margin:12px 0}
 .sh .no{font:400 30px/1.2 "Rubik Bubbles","Noto Sans JP",sans-serif}
 .sh h2{font-size:20px;line-height:1.4;padding-bottom:4px}
@@ -1032,9 +1033,9 @@ small{display:block;font-size:13px;color:#656565}
 .pc .one{font-size:18px;margin:2px 0 12px}
 .box{background:#fff;color:#2d1f4e;border-radius:14px;padding:10px 14px;margin-top:12px}
 .box p{margin-top:2px}
-.gc{position:relative;background:#09ab00;border-radius:46px;padding:30px 24px;margin:64px -6px}
-.gc::before,.gc::after{content:"";position:absolute;left:18px;right:18px;height:60px;background:radial-gradient(circle at 28px 34px,#09ab00 0 28px,transparent 29px) 0 0/90px 60px round no-repeat,radial-gradient(circle at 70px 40px,#09ab00 0 20px,transparent 21px) 0 0/90px 60px round no-repeat}
-.gc::before{top:-46px}.gc::after{bottom:-46px;transform:scaleY(-1)}
+.gc{position:relative;margin:48px -68.5px;padding:84px 94px 85px;border:0 solid transparent}
+.gc.big{margin:48px -181.5px;padding:117px 181px 171px}
+.gc.mid{margin:48px -90px;padding:92px 116px 92px}
 .gc small{color:#fff;font-size:14px}.gc p{font-size:18px;margin-top:2px}
 .note{font-weight:400;margin:4px 0 12px}
 .tc{background:#1a0a3f;border-radius:20px;padding:16px;margin:12px 0}
@@ -1049,7 +1050,7 @@ small{display:block;font-size:13px;color:#656565}
 .gw p{margin-top:4px}
 .caution{border:2px solid #60e6fd;border-radius:20px;padding:16px;margin:12px 0}
 .caution small{color:#60e6fd;font-size:14px}.caution p{margin-top:6px}
-.tips .sh{margin:0 0 8px}.tips ol{padding-left:24px}.tips li{font-size:17px;margin:10px 0}
+.tips .sh{margin:0 0 8px}.tips ol{padding-left:24px;margin-top:8px}.tips li{font-size:17px;margin:10px 0}
 .tips .no{font-size:30px}
 footer{text-align:center;margin-top:20px}
 .date{font:400 14px/1.6 "Angkor","Noto Sans JP",sans-serif;margin-top:20px}
@@ -1255,11 +1256,11 @@ footer{text-align:center;margin-top:20px}
         <div class="row" data-i="${i}">
           <button type="button" class="row-name" data-act="name" data-i="${i}" aria-label="${i + 1}人目のニックネームを入れる">
             <span class="row-num"># ${i + 1}</span>
-            <span class="row-nick">${esc(p.name || 'Nickname')}</span>
+            <span class="row-nick${p.name ? '' : ' empty'}">${esc(p.name || 'Nickname')}</span>
           </button>
           <button type="button" class="row-birth" data-act="birth" data-i="${i}" aria-label="${i + 1}人目の生年月日を入れる">
             <span class="row-bd">Birthday</span>
-            <span class="row-date">${shown(p.digits)}</span>
+            <span class="row-date${p.digits ? '' : ' empty'}">${shown(p.digits)}</span>
           </button>
           <button type="button" class="row-del" data-act="del" data-i="${i}" aria-label="${i + 1}人目を消す"></button>
         </div>`).join('');

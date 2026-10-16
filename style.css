@@ -104,6 +104,8 @@ body[data-screen="result"] .decor-result { display: block; }
 .row-nick { font-weight: 900; font-size: 24px; color: var(--text-accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
 .row-bd { font-family: var(--f-title); font-weight: 400; font-size: 15px; color: var(--text-soft); width: 78px; }
 .row-date { font-family: var(--f-num); font-weight: 400; font-size: 26px; color: var(--text-accent); white-space: nowrap; }
+/* 入力前は薄いグレー、入力したら水色 */
+.row-nick.empty, .row-date.empty { color: var(--text-muted); }
 .row-del {
   position: absolute; right: -20px; top: -16px; width: 47px; height: 47px; background: url(assets/x-circle.svg) center / 47px 47px no-repeat;
 }
@@ -112,7 +114,7 @@ body[data-screen="result"] .decor-result { display: block; }
   display: block; margin: 12px auto 0; width: 44px; height: 44px; position: relative;
 }
 .add::before {
-  content: ""; position: absolute; left: 7px; top: 7px; width: 30px; height: 30px; background: #fff; opacity: .55;
+  content: ""; box-sizing: border-box; position: absolute; left: 7px; top: 7px; width: 30px; height: 30px; background: #fff; opacity: .55;
   border: 2.4px solid var(--border); border-radius: 2px;
 }
 .add::after {
