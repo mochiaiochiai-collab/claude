@@ -2,124 +2,133 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <title>うらないの部屋</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Fortune Room</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Angkor&family=Rubik+Bubbles&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-step="1">
-  <header class="site ipad-only">
-    <div class="site-title">
-      <h1>うらないの部屋</h1>
-      <p class="sub">家族まとめて、四柱推命・九星気学・西洋占星術で見ます</p>
-    </div>
-    <ol class="steps" aria-label="いまの段階">
-      <li class="step step-1">① 入力</li>
-      <li class="step step-2">② 占う</li>
-      <li class="step step-3">③ QRで受け取り</li>
-    </ol>
-  </header>
-  <h1 class="phone-title phone-only">うらないの部屋</h1>
+<body data-screen="list">
 
-  <main id="kazoku">
-    <!-- iPad ①：入力 -->
-    <section id="k-input" class="k-input">
-      <div class="k-left">
-        <h2 class="k-head">家族の名前と生年月日を入れてください</h2>
-        <p class="k-lead">名前はニックネームでOK。生年月日の欄をタップして、右のテンキーで8桁入れます。</p>
-        <div id="k-people" class="k-people"></div>
-        <button type="button" id="k-add" class="btn secondary k-add">＋ 人を足す（10人まで）</button>
-        <div class="k-spacer"></div>
-        <p class="k-foot">※ 占いはエンタメです。生年月日はこのiPadとお客さんのケータイの中だけで使い、どこにも送りません。</p>
+  <!-- ============ iPad（1366×1024 の固定ステージを画面に合わせて拡大縮小） ============ -->
+  <div class="stage ipad-only" id="stage">
+
+    <header class="hd">
+      <div class="hd-list">
+        <h1 class="hd-title">Fortune Room</h1>
+        <p class="hd-note">これはAIでつくったエンタメです。当たるも八卦当たらぬも八卦！</p>
+        <p class="hd-sub">家族まとめて、四柱推命・九星気学・西洋占星術で見てみよう</p>
+      </div>
+      <div class="hd-done">
+        <h1 class="hd-title">Your fortune is ready !</h1>
+        <p class="hd-sub">QRを読み込んで結果をダウンロードしよう</p>
+      </div>
+      <img class="deco hd-bat" src="assets/q-mon-bat.svg" alt="" width="166" height="106">
+    </header>
+
+    <img class="deco mon-tr" src="assets/mon-tr.svg" alt="" width="98" height="226">
+
+    <section class="panel" id="panel">
+      <!-- 入力画面（①②③）のキャラクター -->
+      <div class="decor decor-input" aria-hidden="true">
+        <img class="deco mon-tl" src="assets/mon-tl.svg" alt="" width="200" height="185">
+        <img class="deco mon-bl" src="assets/mon-bl.svg" alt="" width="103" height="146">
+        <div class="deco mon-br">
+          <img src="assets/mon-br-1.svg" alt="" width="147" height="122">
+          <img class="p2" src="assets/mon-br-2.svg" alt="" width="13" height="13">
+          <img class="p3" src="assets/mon-br-3.svg" alt="" width="12" height="10">
+          <img class="p4" src="assets/mon-br-4.svg" alt="" width="13" height="9">
+          <img class="p5" src="assets/mon-br-5.svg" alt="" width="3" height="4">
+        </div>
+      </div>
+      <!-- 結果画面（④）のキャラクター -->
+      <div class="decor decor-result" aria-hidden="true">
+        <img class="deco q-bl" src="assets/q-mon-bl.svg" alt="" width="203" height="112">
+        <img class="deco q-br" src="assets/q-mon-br.svg" alt="" width="128" height="109">
+        <div class="deco q-tl"><img src="assets/q-mon-tl.svg" alt="" width="207" height="208"></div>
       </div>
 
-      <aside class="k-pad" aria-label="生年月日のテンキー">
-        <div class="k-pad-top">
-          <p id="k-pad-label" class="k-pad-label"></p>
-          <div id="k-pad-disp" class="k-pad-disp" aria-live="polite"></div>
-          <p class="k-pad-hint">西暦・月・日の順に8桁。例：2013年4月1日 → 20130401</p>
-          <p id="k-pad-msg" class="msg" role="alert"></p>
-        </div>
-        <div class="k-pad-bottom">
-          <div class="k-keys" role="group" aria-label="数字">
-            <button type="button" class="k-key" data-k="1">1</button>
-            <button type="button" class="k-key" data-k="2">2</button>
-            <button type="button" class="k-key" data-k="3">3</button>
-            <button type="button" class="k-key" data-k="4">4</button>
-            <button type="button" class="k-key" data-k="5">5</button>
-            <button type="button" class="k-key" data-k="6">6</button>
-            <button type="button" class="k-key" data-k="7">7</button>
-            <button type="button" class="k-key" data-k="8">8</button>
-            <button type="button" class="k-key" data-k="9">9</button>
-            <button type="button" class="k-key sub" data-k="clear">クリア</button>
-            <button type="button" class="k-key" data-k="0">0</button>
-            <button type="button" class="k-key sub" data-k="back" aria-label="1文字消す">⌫</button>
+      <!-- ① 家族の一覧 -->
+      <div class="view" id="v-list">
+        <p class="v-text">名前はニックネームでOK。生年月をいれてね！</p>
+        <div class="list-scroll"><div class="list" id="k-people"></div></div>
+        <p class="msg" id="k-msg" role="alert"></p>
+      </div>
+
+      <!-- ② ニックネーム -->
+      <div class="view" id="v-name" hidden>
+        <p class="v-text">名前はニックネームでOK！</p>
+        <div class="field" id="n-disp" aria-live="polite"></div>
+        <div class="pad pad-kana">
+          <div class="kana" id="n-keys"></div>
+          <div class="pad-row">
+            <button type="button" class="pad-back" id="n-back">Back</button>
+            <button type="button" class="pad-ok" id="n-ok">OK！</button>
           </div>
-          <p id="k-msg" class="msg" role="alert"></p>
-          <button type="button" id="k-go" class="btn primary">家族まとめて占う</button>
         </div>
-      </aside>
+      </div>
+
+      <!-- ③ 生年月日 -->
+      <div class="view" id="v-birth" hidden>
+        <p class="v-text">誕生日は８桁の数字でOK→19980506</p>
+        <div class="field field-num" id="b-disp" aria-live="polite"></div>
+        <div class="pad pad-num">
+          <div class="nums" id="b-keys"></div>
+          <p class="msg msg-pad" id="b-msg" role="alert"></p>
+          <div class="pad-row">
+            <button type="button" class="pad-back" id="b-back">Back</button>
+            <button type="button" class="pad-ok" id="b-ok">OK！</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ④ 結果案内（QR） -->
+      <div class="view" id="v-result" hidden>
+        <div class="sum">
+          <p class="sum-lead">ひとことで言うと・・・</p>
+          <p class="sum-title" id="k-sum-title"></p>
+          <p class="sum-text" id="k-sum-text"></p>
+          <div class="sum-list" id="k-sum-list"></div>
+        </div>
+        <div class="qr-wrap">
+          <div class="qr" id="k-qr-img" aria-label="結果のQRコード"></div>
+          <p class="msg msg-qr" id="k-qr-msg" role="status"></p>
+        </div>
+      </div>
     </section>
 
-    <section id="k-result" class="k-result" hidden>
-      <!-- iPad ②：QR -->
-      <div class="k-qrcard ipad-only">
-        <h2>ケータイのカメラで<br>読みとってください</h2>
-        <div id="k-qr-img" class="k-qr-img" aria-label="結果のQRコード"></div>
-        <p class="k-qr-lead">読みとると「結果をダウンロード」の画面が出ます</p>
-        <div class="k-spacer"></div>
-        <p id="k-qr-msg" class="msg" role="status"></p>
-        <p class="k-qr-note">QRコードに入ってるのは生年月日と名前だけ。占いはケータイの中で計算するので、どこのサーバーにも送られません。</p>
-      </div>
+    <!-- 緑の雲ボタン（中身は family.js で組み立てる） -->
+    <button type="button" class="cloud cloud-go" id="k-go" data-text="Let's<br>Fortune !" aria-label="Let's Fortune !"></button>
+    <button type="button" class="cloud cloud-close" id="k-close" data-text="Close" aria-label="Close"></button>
+  </div>
 
-      <div class="k-side ipad-only">
-        <div class="k-summary">
-          <p class="k-sum-n" id="k-sum-n"></p>
-          <p class="k-sum-title" id="k-sum-title"></p>
-          <p class="k-sum-text" id="k-sum-text"></p>
-          <div class="k-sum-list" id="k-sum-list"></div>
-        </div>
-        <div class="k-spacer"></div>
-        <div class="k-staff">
-          <p class="k-staff-note">お客さんの画面に「ダウンロードしました」が出たのを確かめてから押してください</p>
-          <button type="button" id="k-next" class="btn primary">次のお客さんへ（入力を全部消す）</button>
-          <div id="k-next-confirm" class="k-next-confirm" hidden>
-            <span>名前と生年月日を全部消して、最初の画面にもどります。</span>
-            <button type="button" id="k-next-yes" class="btn primary">消す</button>
-            <button type="button" id="k-next-no" class="btn secondary">やめる</button>
-          </div>
-          <button type="button" id="k-back" class="btn secondary">← 入力にもどる（直したいとき）</button>
-        </div>
+  <!-- ============ ケータイ ============ -->
+  <main class="phone phone-only" id="phone">
+    <section class="p-screen" id="p-dl">
+      <div class="p-head">
+        <h1 class="p-title">Fortune<br>Room</h1>
+        <p class="p-lead">結果はダウンロードされます</p>
       </div>
+      <div class="p-card" id="k-dl-names"></div>
+      <img class="deco p-robot" src="assets/p-mon-robot.svg" alt="" width="81" height="64">
+      <img class="deco p-crab" src="assets/p-mon-crab.svg" alt="" width="164" height="101">
+      <img class="deco p-dino" src="assets/p-mon-dino.svg" alt="" width="164" height="199">
+      <button type="button" class="cloud cloud-dl" id="k-dl" data-text="Download" data-arrow="1" aria-label="結果をダウンロード"></button>
+    </section>
 
-      <!-- ケータイ：ダウンロード -->
-      <div class="phone-only k-dl">
-        <h2>占いの結果を<br>ダウンロードしてください</h2>
-        <p class="k-dl-names" id="k-dl-names"></p>
-        <button type="button" id="k-dl" class="btn primary">結果をダウンロード</button>
-        <p class="k-dl-size" id="k-dl-size"></p>
-        <div id="k-dl-done" class="k-dl-done" hidden>
-          <p class="k-dl-ok">✓ ダウンロードしました</p>
-          <p class="k-dl-close">このページは閉じて大丈夫です。</p>
-          <p class="k-dl-where">iPhone：ファイル ＞ ダウンロード<br>Android：ダウンロード フォルダ</p>
-        </div>
-        <details class="k-dl-help">
-          <summary>ダウンロードできないときは ＞</summary>
-          <p>LINE などのアプリの中で開いてると、ダウンロードできへんことがあります。右上のメニューから「Safariで開く」「ブラウザで開く」を選ぶか、下のボタンで文章をコピーしてメモに貼りつけてください。</p>
-          <button type="button" id="k-copy" class="btn secondary">結果の文章をコピー</button>
-          <p id="k-copy-msg" class="k-dl-where" role="status"></p>
-          <textarea id="k-copy-text" class="k-copy-text" rows="8" readonly hidden></textarea>
-        </details>
-      </div>
+    <section class="p-screen p-saved" id="p-saved" hidden>
+      <img class="saved-cloud" src="assets/saved-cloud.svg" alt="" width="347" height="291">
+      <p class="saved-text">Saved !</p>
+      <img class="saved-check" src="assets/check.svg" alt="" width="52" height="52">
+      <p class="saved-bye">See you !</p>
+      <img class="deco s-bl" src="assets/s-mon-bl.svg" alt="" width="203" height="110">
+      <div class="deco s-bat s-bat1"><img src="assets/s-bat-1.svg" alt="" width="130" height="105"></div>
+      <div class="deco s-bat s-bat2"><img src="assets/s-bat-2.svg" alt="" width="34" height="30"></div>
+      <div class="deco s-bat s-bat3"><img src="assets/s-bat-3.svg" alt="" width="30" height="39"></div>
     </section>
   </main>
-
-  <footer class="phone-only">
-    <p>※ 占いはエンタメです。科学的根拠はありません。</p>
-  </footer>
 
   <script src="family.js"></script>
 </body>

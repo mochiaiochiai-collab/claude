@@ -22,7 +22,7 @@ Claude Code（クラウド）で作ってきたものを、デスクトップの
 | ファイル | 中身 |
 |---|---|
 | `family.js` | 暦・天文計算、占いの判定、レポートの文章、QR 用の符号化、テキスト出力、入力 UI、ケータイ用画面。node でも require できる |
-| `index.html` / `style.css` | 画面。iPad 用（`ipad-only`）とケータイ用（`body.phone` のとき `phone-only`）を出し分け |
+| `index.html` / `style.css` / `assets/` | 画面。iPad 用（`ipad-only`）とケータイ用（`body.phone` のとき `phone-only`）を出し分け。`assets/` は Figma から書き出したキャラクターと雲の SVG |
 | `vendor/qrcode.js` | qrcode-generator 2.0.4（MIT）。iPad 側だけで読み込む |
 | `test.js` | テスト。`node test.js` |
 | `check.js` | ランダムな家族でレポートの矛盾を検査。`node check.js`（1万家族・約12秒）、`node check.js 100000` |
@@ -54,14 +54,14 @@ node check.js     # 「問題なし」になること
 
 - QR には結果やなく「生年月日と名前」だけを URL の `#` の後ろに入れる（base64url、4人で約140文字）。`#` 以降はサーバーに送られない
 - 公開先は `family.js` の `SITE_URL`（`https://mochiaiochiai-collab.github.io/claude/`）
-- ケータイは約29KB 読み込んで、端末の中で占いを計算し直す。iPad は最初に開いたあとは通信なしで動く（QR の部品もページを開いた時点で読み込む）
+- ケータイは約29KB（＋Google Fonts とキャラクターの SVG）読み込んで、端末の中で占いを計算し直す。iPad は最初に開いたあとは通信なしで動く（QR の部品もページを開いた時点で読み込む。フォントも一度開けば端末に残る）
 - ダウンロードのファイル名は英数字（`uranai_YYYYMMDD.txt`）。日本語名はブラウザに捨てられることがある
-- LINE のアプリ内ブラウザではダウンロードできないことがあるので「文章をコピー」のボタンを付けてある
+- LINE のアプリ内ブラウザではダウンロードできないことがある（デザインから「文章をコピー」は外した。必要ならデザインに足してから戻す）
 
 ## 守ること
 
 - **このリポジトリは公開設定。実在の家族の名前・生年月日をコード・テスト・コミットメッセージに入れない。** テストは架空の日付を使う
-- 結果画面に「占いはエンタメ、科学的根拠なし」を必ず残す
+- 「エンタメで当たるも八卦」の一言は入力画面のタイトル下に残す（デザインどおり。以前の「科学的根拠なし」の常時表示はデザインで外した）
 - アプリの文章は関西弁。占いでも、計算で出せないこと（「20代後半に必ず〜」のような断定）は書かない
 
 ## 今の状態と、残りの作業
@@ -69,12 +69,14 @@ node check.js     # 「問題なし」になること
 - [x] 占いの計算と検証、関西弁レポート、QR → ケータイでテキストをダウンロードする流れ
 - [x] GitHub に push 済み（ブランチ `claude/fortune-telling-app-czkdno`）
 - [ ] **GitHub Pages の公開**：リポジトリの Settings → Pages → Source「Deploy from a branch」→ Branch `claude/fortune-telling-app-czkdno`・`/ (root)` → Save。公開後に `https://mochiaiochiai-collab.github.io/claude/` が開くか、QR からケータイでダウンロードまで通るかを確認する
-- [x] **新しいデザインをアプリに反映**（Figma「うらないの部屋 UI」 https://www.figma.com/design/lqojDwkLotKxQJgp0Usisi ）
-  - iPad ①入力（左に入力行、右にテンキーと「家族まとめて占う」を常に表示）／②QR（左に QR、右に結果のあらましと「次のお客さんへ」）／ケータイ③④ダウンロード（押す前・押した後）
-  - 色は `style.css` の `:root` に Figma の変数「うらない/色」をそのまま入れてある。`color-scheme: light` で固定
-  - フォントは Figma のデザインメモどおり、全部 Zen Maru Gothic（Google Fonts）。ケータイも読み込むので通信は約29KBより増える
-  - iPad は1画面に収める（高さが足りないときはテンキーが縮む）。結果の長いレポートは画面には出さず、ケータイのテキストファイルだけに入る
-  - **要確認**：Figma の変数（文字 #40a948 など黄緑系）とデザインメモ（文字は濃い紫 #2A2140、背景ほぼ白）が食い違ってる。屋外で読めるかは実機で見て、`:root` の値を差し替える
+- [x] **新しいデザインをアプリに反映**（Figma「うらないの部屋 UI」 https://www.figma.com/design/lqojDwkLotKxQJgp0Usisi の「デザイン」セクション。名前は Fortune Room）
+  - 流れ：① 一覧（家族の行をタップ）→ ② ニックネーム（ひらがなキーボード、゛゜小つき）→ ③ 生年月日（数字10個）→ 一覧で「Let's Fortune !」→ ④ 結果案内（結果のあらましと QR、「Close」で全部消して最初へ）。ケータイは「Download」→「Saved !」
+  - iPad は 1366×1024 の固定ステージを画面に合わせて拡大縮小（`--s`）。Figma と同じ配置のまま収まる。家族が多い時は一覧、結果の表だけがスクロール
+  - ケータイは 390 幅が基準。キャラクターや雲は `assets/` の SVG（Figma から書き出し）
+  - Back は1文字消す（空なら一覧にもどる）。OK で確定。ニックネームを確定して生年月日が空なら、そのまま生年月日の画面へ進む
+  - 色は `style.css` の `:root` に Figma の変数をそのまま入れてある（暗い紫の1モード、`color-scheme: dark` 固定）。フォントは Rubik Bubbles（タイトル）・Angkor（数字）・Zen Maru Gothic（本文）を Google Fonts から読む。デザインの Toppan Bunkyu は配布の許可が要るので Zen Maru Gothic Black で代用
+  - デザイン側の「Downroad」は typo と見て「Download」にしてある
+  - ケータイのダウンロード失敗時の「文章をコピー」と、「生年月日は送りません」の説明は、デザインどおりに外した（`family.js` にはコピーする仕組みは残してない）
 - [ ] 当日のリハーサル：iPad を GitHub Pages の URL で開く → テザリングを切っても占いと QR が出るか → iPhone と Android でダウンロードできるか
 
 ## 当日の運用メモ

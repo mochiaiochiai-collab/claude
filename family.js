@@ -881,25 +881,60 @@
     return qrLib;
   }
 
-  // ---------- 入力UI（数字ボタンで8桁） ----------
+  // ---------- 画面（Fortune Room） ----------
 
   const STORE = 'uranai.kazoku.v1';
   const MAX_PEOPLE = 10;
+  const NAME_MAX = 12;
+
+  // ひらがなキーボード：左から わ ら や ま は な た さ か あ の列（上から5段）
+  const KANA_COLS = [
+    ['わ', 'を', 'ん', 'ー', '小'], ['ら', 'り', 'る', 'れ', 'ろ'], ['や', '゛', 'ゆ', '゜', 'よ'],
+    ['ま', 'み', 'む', 'め', 'も'], ['は', 'ひ', 'ふ', 'へ', 'ほ'], ['な', 'に', 'ぬ', 'ね', 'の'],
+    ['た', 'ち', 'つ', 'て', 'と'], ['さ', 'し', 'す', 'せ', 'そ'], ['か', 'き', 'く', 'け', 'こ'],
+    ['あ', 'い', 'う', 'え', 'お'],
+  ];
+  // 濁点・半濁点・小さい字の変換表（もう一回押すと元にもどる）
+  const DAKU = { 'か': 'が', 'き': 'ぎ', 'く': 'ぐ', 'け': 'げ', 'こ': 'ご', 'さ': 'ざ', 'し': 'じ', 'す': 'ず', 'せ': 'ぜ', 'そ': 'ぞ', 'た': 'だ', 'ち': 'ぢ', 'つ': 'づ', 'て': 'で', 'と': 'ど', 'は': 'ば', 'ひ': 'び', 'ふ': 'ぶ', 'へ': 'べ', 'ほ': 'ぼ', 'う': 'ゔ' };
+  const HANDAKU = { 'は': 'ぱ', 'ひ': 'ぴ', 'ふ': 'ぷ', 'へ': 'ぺ', 'ほ': 'ぽ' };
+  const SMALL = { 'あ': 'ぁ', 'い': 'ぃ', 'う': 'ぅ', 'え': 'ぇ', 'お': 'ぉ', 'つ': 'っ', 'や': 'ゃ', 'ゆ': 'ゅ', 'よ': 'ょ', 'わ': 'ゎ' };
+  const invert = table => Object.fromEntries(Object.entries(table).map(([k, v]) => [v, k]));
+  const UNDAKU = invert(DAKU);
+  const UNHANDAKU = invert(HANDAKU);
+  const UNSMALL = invert(SMALL);
+  // 最後の1文字を変える。例：は →゛→ ば →゛→ は、は →゜→ ぱ →゜→ は、つ →小→ っ →小→ つ
+  function modifyLast(text, kind) {
+    if (!text) return text;
+    const chars = [...text];
+    const ch = chars.pop();
+    let next = null;
+    if (kind === '゛') next = DAKU[ch] || UNDAKU[ch] || (UNHANDAKU[ch] ? DAKU[UNHANDAKU[ch]] : null);
+    else if (kind === '゜') next = HANDAKU[ch] || UNHANDAKU[ch] || (UNDAKU[ch] && HANDAKU[UNDAKU[ch]]) || null;
+    else if (kind === '小') next = SMALL[ch] || UNSMALL[ch] || null;
+    return chars.join('') + (next || ch);
+  }
+
+  // 緑の雲ボタン（丸い雲10個＋本体＋文字）
+  const CLOUD_BLOBS = [[17.14, 97.37], [0, 144.11], [58.42, 58.42], [113.73, 31.94], [169.03, 31.94], [230.57, 0], [265.62, 38.95], [327.16, 46.74], [348.19, 85.68], [389.47, 144.11]];
+  function buildCloud(el) {
+    const blobs = CLOUD_BLOBS.map(([x, y]) => `<img src="assets/cloud-blob.svg" alt="" style="left:calc(${x} * var(--n));top:calc(${y} * var(--n));width:calc(82.568 * var(--n));height:calc(77.895 * var(--n))">`).join('');
+    const body = '<img src="assets/cloud-body.svg" alt="" style="left:calc(10.13 * var(--n));top:calc(55.31 * var(--n));width:calc(440.884 * var(--n));height:calc(166.695 * var(--n))">';
+    const arrow = el.dataset.arrow ? '<img class="cl-arrow" src="assets/arrow-down.svg" alt="">' : '';
+    el.innerHTML = `${blobs}${body}<span class="cl-text">${el.dataset.text}</span>${arrow}`;
+  }
 
   function setupKazoku(doc) {
     const $ = id => doc.getElementById(id);
     if (!$('k-people')) return;
+    doc.querySelectorAll('.cloud').forEach(buildCloud);
 
     const shared = typeof location !== 'undefined' && location.hash.length > 1 ? decodeShare(location.hash.slice(1)) : null;
     if (shared) {
       doc.body.classList.add('phone');
-      $('k-input').hidden = true;
-      $('k-result').hidden = false;
       const now = new Date();
       const made = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
       const text = reportText(renderReport(familyReading(shared, now)), made);
-      $('k-dl-names').textContent = shared.map(p => p.name).join('・');
-      $('k-dl-size').textContent = `テキストファイル・約${Math.max(1, Math.round(new Blob([text]).size / 1024))}KB`;
+      $('k-dl-names').innerHTML = shared.map(p => `<div>${esc(p.name)}</div>`).join('');
       const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
       $('k-dl').addEventListener('click', () => {
         const url = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/plain;charset=utf-8' }));
@@ -908,161 +943,149 @@
         a.download = `uranai_${stamp}.txt`; // 日本語のファイル名は落とされるブラウザがあるので英数字にする
         doc.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 60000);
-        $('k-dl-done').hidden = false;
-      });
-      // ダウンロードできへんアプリ内ブラウザ（LINE など）用：全文コピー
-      $('k-copy').addEventListener('click', () => {
-        const ok = () => { $('k-copy-msg').textContent = 'コピーしました。メモ帳アプリなどに貼りつけて保存してください。'; };
-        const fallback = () => {
-          const ta = $('k-copy-text');
-          ta.hidden = false; ta.value = text; ta.focus(); ta.select();
-          $('k-copy-msg').textContent = 'コピーできへんかったので、下の文章を長押しして全部選んでコピーしてください。';
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback);
-        else fallback();
+        $('p-dl').hidden = true;
+        $('p-saved').hidden = false;
+        window.scrollTo(0, 0);
       });
       return;
     }
-    if (typeof location !== 'undefined' && location.hash.length > 1) {
-      $('k-msg').textContent = 'リンクの中身が読めませんでした。QRコードをもう一回読みとってみてください。';
-    }
+
+    // ---- iPad：1366×1024 のステージを画面にぴったり合わせる ----
+    const fit = () => {
+      const s = Math.min(window.innerWidth / 1366, window.innerHeight / 1024);
+      doc.documentElement.style.setProperty('--s', String(s));
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+
     // iPad 側：通信が切れても QR が出せるように、開いた時点で QR の部品を読み込んでおく
     loadQr(doc).catch(() => {});
 
     const blank = () => [0, 1, 2, 3].map(() => ({ name: '', digits: '' }));
     let people;
     try { people = JSON.parse(localStorage.getItem(STORE)); } catch { people = null; }
-    if (!Array.isArray(people) || people.length < 2) people = blank();
-    // from 番目以降で、まだ生年月日が入ってへない最初の人（なければ -1）
-    const firstOpen = from => people.findIndex((q, j) => j >= from && q.digits.length < 8);
-    let active = firstOpen(0);
+    if (!Array.isArray(people) || people.length < 1) people = blank();
+    people = people.map(p => ({ name: String(p.name || '').slice(0, NAME_MAX), digits: String(p.digits || '').replace(/\D/g, '').slice(0, 8) }));
     const save = () => { try { localStorage.setItem(STORE, JSON.stringify(people)); } catch { /* 保存できへん環境でも動く */ } };
-    const step = n => { doc.body.dataset.step = String(n); };
 
     const shown = digits => {
       const s = digits.padEnd(8, '_');
       return `${s.slice(0, 4)} / ${s.slice(4, 6)} / ${s.slice(6, 8)}`;
     };
-    const dateOk = p => p.digits.length === 8 && !!parseDigits(p.digits);
+    const screens = { list: 'v-list', name: 'v-name', birth: 'v-birth', result: 'v-result' };
+    function go(name) {
+      Object.entries(screens).forEach(([k, id]) => { $(id).hidden = k !== name; });
+      doc.body.dataset.screen = name;
+    }
 
-    // 人の数が変わったときだけ作り直す（入力中の名前欄を壊さへんため）
+    // ---- ① 一覧 ----
     function render() {
-      $('k-people').innerHTML = people.map((p, i) => `
-        <div class="k-row" data-i="${i}">
-          <span class="k-num">${i + 1}人目</span>
-          <input id="k-name-${i}" class="k-name" data-i="${i}" type="text" maxlength="12" placeholder="名前（なんでもOK）" value="${esc(p.name)}">
-          <button type="button" id="k-date-${i}" class="k-date" data-i="${i}">
-            <span class="k-date-l">生年月日</span><span class="k-date-v"></span>
+      const rows = people.map((p, i) => `
+        <div class="row" data-i="${i}">
+          <button type="button" class="row-name" data-act="name" data-i="${i}" aria-label="${i + 1}人目のニックネームを入れる">
+            <span class="row-num"># ${i + 1}</span>
+            <span class="row-nick">${esc(p.name || 'Nickname')}</span>
           </button>
-          ${people.length > 2 ? `<button type="button" class="k-del" data-i="${i}" aria-label="${i + 1}人目を消す">消す</button>` : ''}
+          <button type="button" class="row-birth" data-act="birth" data-i="${i}" aria-label="${i + 1}人目の生年月日を入れる">
+            <span class="row-bd">Birthday</span>
+            <span class="row-date">${shown(p.digits)}</span>
+          </button>
+          <button type="button" class="row-del" data-act="del" data-i="${i}" aria-label="${i + 1}人目を消す"></button>
         </div>`).join('');
-      $('k-add').disabled = people.length >= MAX_PEOPLE;
-      $('k-add').textContent = people.length >= MAX_PEOPLE ? `${MAX_PEOPLE}人までやで` : `＋ 人を足す（${MAX_PEOPLE}人まで）`;
-      paint();
+      const add = people.length < MAX_PEOPLE ? '<button type="button" class="add" data-act="add" aria-label="人を足す"><i></i></button>' : '';
+      $('k-people').innerHTML = rows + add;
     }
 
-    // 行の色・日付・テンキーの表示だけを更新する
-    function paint() {
-      people.forEach((p, i) => {
-        const row = $('k-people').children[i];
-        row.classList.toggle('open', i === active);
-        row.classList.toggle('done', dateOk(p));
-        row.querySelector('.k-date-v').textContent = shown(p.digits);
-      });
-      const a = people[active];
-      const nm = a && a.name.trim();
-      $('k-pad-label').textContent = a ? `${active + 1}人目${nm ? `（${nm}）` : ''}の生年月日` : '生年月日を入れる人の行をタップしてください';
-      $('k-pad-disp').textContent = shown(a ? a.digits : '');
-    }
-
-    function setActive(i) {
-      if (i === active) return;
-      active = i;
-      $('k-pad-msg').textContent = '';
-      paint();
-    }
-
-    $('k-people').addEventListener('input', e => {
-      if (e.target.classList.contains('k-name')) {
-        people[Number(e.target.dataset.i)].name = e.target.value;
-        save(); paint();
-      }
-    });
-    $('k-people').addEventListener('focusin', e => {
-      if (e.target.classList.contains('k-name')) setActive(Number(e.target.dataset.i));
-    });
-
+    let editing = 0;
+    let draft = '';
     $('k-people').addEventListener('click', e => {
       const t = e.target.closest('button');
       if (!t) return;
-      if (t.classList.contains('k-del')) {
-        people.splice(Number(t.dataset.i), 1);
-        active = firstOpen(0);
-        $('k-pad-msg').textContent = '';
+      const i = Number(t.dataset.i);
+      $('k-msg').textContent = '';
+      if (t.dataset.act === 'add') {
+        if (people.length >= MAX_PEOPLE) return;
+        people.push({ name: '', digits: '' });
         save(); render();
-        return;
+        const sc = doc.querySelector('.list-scroll');
+        sc.scrollTop = sc.scrollHeight;
+      } else if (t.dataset.act === 'del') {
+        if (people.length > 1) people.splice(i, 1);
+        else people[0] = { name: '', digits: '' };
+        save(); render();
+      } else if (t.dataset.act === 'name') {
+        editing = i; draft = people[i].name; paintName(); go('name');
+      } else if (t.dataset.act === 'birth') {
+        editing = i; draft = people[i].digits; paintBirth(); go('birth');
       }
-      if (t.classList.contains('k-date')) setActive(Number(t.dataset.i));
     });
 
-    doc.querySelector('.k-keys').addEventListener('click', e => {
-      const t = e.target.closest('.k-key');
-      if (!t || active < 0) return;
-      const p = people[active];
+    // ---- ② ニックネーム ----
+    function paintName() {
+      $('n-disp').innerHTML = draft ? esc(draft) : '<span class="ph">Nickname</span>';
+    }
+    $('n-keys').innerHTML = KANA_COLS.map(col => `<div class="kana-col">${col.map(k => `<button type="button" class="key" data-k="${k}">${k}</button>`).join('')}</div>`).join('');
+    $('n-keys').addEventListener('click', e => {
+      const t = e.target.closest('.key');
+      if (!t) return;
       const k = t.dataset.k;
-      $('k-pad-msg').textContent = '';
-      if (k === 'clear') p.digits = '';
-      else if (k === 'back') p.digits = p.digits.slice(0, -1);
-      else if (p.digits.length < 8) p.digits += k;
-      save();
-
-      if (p.digits.length === 8) {
-        if (!parseDigits(p.digits)) {
-          paint();
-          $('k-pad-msg').textContent = 'その日付はないみたいやで。1900年以降の、今日までの日付を入れてな';
-          return;
-        }
-        // 次のまだ入ってへん人へ進む
-        const next = firstOpen(active + 1);
-        active = next >= 0 ? next : firstOpen(0);
-        paint();
-        if (active >= 0) $(`k-date-${active}`).scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        return;
-      }
-      paint();
+      if (k === '゛' || k === '゜' || k === '小') draft = modifyLast(draft, k);
+      else if ([...draft].length < NAME_MAX) draft += k;
+      paintName();
     });
-
-    $('k-add').addEventListener('click', () => {
-      if (people.length >= MAX_PEOPLE) return;
-      people.push({ name: '', digits: '' });
-      active = people.length - 1;
+    $('n-back').addEventListener('click', () => {
+      if (draft) { draft = [...draft].slice(0, -1).join(''); paintName(); } else go('list');
+    });
+    $('n-ok').addEventListener('click', () => {
+      people[editing].name = draft.trim();
       save(); render();
-      $(`k-name-${active}`).focus();
+      // 生年月日がまだなら、そのまま続けて入れてもらう
+      if (people[editing].digits.length < 8) { draft = people[editing].digits; paintBirth(); go('birth'); } else go('list');
     });
 
+    // ---- ③ 生年月日 ----
+    function paintBirth() {
+      $('b-disp').textContent = shown(draft);
+      $('b-msg').textContent = '';
+    }
+    $('b-keys').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(n => `<button type="button" class="num" data-k="${n}">${n}</button>`).join('');
+    $('b-keys').addEventListener('click', e => {
+      const t = e.target.closest('.num');
+      if (!t || draft.length >= 8) return;
+      draft += t.dataset.k;
+      paintBirth();
+    });
+    $('b-back').addEventListener('click', () => {
+      if (draft) { draft = draft.slice(0, -1); paintBirth(); } else go('list');
+    });
+    $('b-ok').addEventListener('click', () => {
+      if (draft.length > 0 && draft.length < 8) { $('b-msg').textContent = '8桁そろえてね（例：19980506）'; return; }
+      if (draft.length === 8 && !parseDigits(draft)) { $('b-msg').textContent = 'その日付はないみたい。1900年以降の、今日までの日付を入れてね'; return; }
+      people[editing].digits = draft;
+      save(); render(); go('list');
+    });
+
+    // ---- Let's Fortune ! ----
     $('k-go').addEventListener('click', () => {
       const msg = $('k-msg');
       const filled = people.map((p, i) => ({ ...p, i })).filter(p => p.digits.length > 0);
       const bad = filled.find(p => !parseDigits(p.digits));
       if (bad) { msg.textContent = `${bad.i + 1}人目の生年月日が途中か、ありえへん日付になってるで`; return; }
-      if (filled.length < 2) { msg.textContent = '2人以上の生年月日を入れてな'; return; }
+      if (filled.length < 2) { msg.textContent = '2人以上の生年月日を入れてね'; return; }
       msg.textContent = '';
       const list = filled.map(p => ({ name: p.name.trim() || `${p.i + 1}人目`, date: parseDigits(p.digits) }));
       showSummary(familyReading(list));
-      $('k-input').hidden = true;
-      $('k-result').hidden = false;
-      step(3);
-      window.scrollTo(0, 0);
+      go('result');
       showQr(encodeShare(list));
     });
 
     // 結果のあらまし（くわしい文章はケータイのファイルに入ってる）
     function showSummary(r) {
-      $('k-sum-n').textContent = `${r.charts.length}人の家族は`;
       $('k-sum-title').textContent = r.house.title;
-      $('k-sum-text').textContent = r.house.strong;
+      $('k-sum-text').textContent = '四柱推命・九星気学・西洋占星術で見ると、' + r.house.strong;
       $('k-sum-list').innerHTML = r.charts.map(c => `
-        <div class="k-sum-row"><b>${esc(c.name)}</b><span>${pillarStr(c.p.day)}</span><span>${KYUSEI[c.kyusei][0]}${c.p.risshunDay ? '※' : ''}</span><span>${c.sun.name}${c.sunAlt ? '※' : ''}</span></div>`).join('');
+        <div class="sum-row"><span>${esc(c.name)}</span><span>${pillarStr(c.p.day)}</span><span>${KYUSEI[c.kyusei][0]}${c.p.risshunDay ? '※' : ''}</span><span>${c.sun.name}${c.sunAlt ? '※' : ''}</span></div>`).join('');
     }
 
     function showQr(token) {
@@ -1080,30 +1103,19 @@
       });
     }
 
-    const back = () => {
-      $('k-result').hidden = true;
-      $('k-input').hidden = false;
-      step(1);
-      window.scrollTo(0, 0);
-    };
-    $('k-back').addEventListener('click', back);
-
-    // 次のお客さんへ：入力と結果を全部消す（イベントで前の人のデータが見えへんように）
-    $('k-next').addEventListener('click', () => { $('k-next-confirm').hidden = false; });
-    $('k-next-no').addEventListener('click', () => { $('k-next-confirm').hidden = true; });
-    $('k-next-yes').addEventListener('click', () => {
+    // Close：入力と結果を全部消して最初にもどる（前の人のデータが見えへんように）
+    $('k-close').addEventListener('click', () => {
       people = blank();
-      active = 0;
       try { localStorage.removeItem(STORE); } catch { /* 保存できへん環境 */ }
       $('k-sum-list').innerHTML = '';
-      $('k-next-confirm').hidden = true;
       $('k-qr-img').innerHTML = '';
-      $('k-pad-msg').textContent = '';
+      $('k-msg').textContent = '';
       render();
-      back();
+      go('list');
     });
 
     render();
+    go('list');
   }
 
   const api = { reportText, encodeShare, decodeShare, shareUrl, ageAt, spanLabel, risshunDate, tsuhenOf, jdn, parseDigits, pillars, pillarStr, sunLongitude, sunSign, moonLongitude, moonSign, chart, compat, familyReading, renderReport, flowOf, kyuseiOfYear, personLabel, setupKazoku, STEMS, BRANCHES };
