@@ -1373,6 +1373,9 @@ footer{text-align:center;margin-top:20px}
       });
     }
 
+    // 右上のリロードボタン：ページを読み込み直す（入力した内容は端末に残ってるのでそのまま）
+    $('k-reload').addEventListener('click', () => location.reload());
+
     // Close：入力と結果を全部消して最初にもどる（前の人のデータが見えへんように）
     $('k-close').addEventListener('click', () => {
       people = blank();
