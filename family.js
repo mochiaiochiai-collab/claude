@@ -885,7 +885,7 @@
     const kids = gens.length >= 2 ? gens[gens.length - 1] : [];
     const e = esc;
     const img = (k, cls) => (art[k] ? `<img class="${cls}" src="${art[k]}" alt="">` : '');
-    const cloudCss = art.cloud ? `.gc{background:none;border-radius:0;border-image-source:url(${art.cloud});border-image-slice:220 260 220 260 fill;border-image-repeat:stretch;border-image-width:110px 130px 110px 130px}.gc.b{border-image-width:120px 142px 120px 142px}.gc.c{border-image-width:161px 190px 161px 190px}` : '';
+    const cloudCss = art.cloud ? `.gc{background:none;border-radius:0;border-image-source:url(${art.cloud});border-image-slice:220 260 220 260 fill;border-image-repeat:stretch;border-image-width:calc(110 * var(--u)) calc(130 * var(--u)) calc(110 * var(--u)) calc(130 * var(--u))}.gc.b{border-image-width:calc(120 * var(--u)) calc(142 * var(--u)) calc(120 * var(--u)) calc(142 * var(--u))}.gc.c{border-image-width:calc(161 * var(--u)) calc(190 * var(--u)) calc(161 * var(--u)) calc(190 * var(--u))}` : '';
 
     // ---- 見どころ ----
     const facts = [];
@@ -1006,13 +1006,13 @@ ${growCards}
   }
 
   const RESULT_CSS = `
-*{box-sizing:border-box}html{background:#2d1f4e}
+*{box-sizing:border-box}html{background:#2d1f4e;--u:calc(min(100vw, 430px) / 390)}
 body{margin:0;background:#2d1f4e;color:#fff;font:700 16px/25px "Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;-webkit-text-size-adjust:100%}
 main{max-width:430px;margin:0 auto;padding:0 20px 39px;overflow-x:hidden}
 h1,h2,h3,p,ol,ul{margin:0}
 small{display:block;font-size:13px;line-height:20px;color:#656565}
 .top{position:relative;height:234px;margin:0 -20px}
-.hc{position:absolute;left:50%;margin-left:-167px;top:-97px;width:347px;height:291px}
+.hc{position:absolute;left:50%;margin-left:calc(-167 * var(--u));top:calc(-97 * var(--u));width:calc(347 * var(--u));height:calc(291 * var(--u))}
 .top h1{position:absolute;left:50%;margin-left:-167px;top:26px;width:347px;text-align:center;font:400 40px/44px "Rubik Bubbles","Noto Sans JP",sans-serif}
 .bat{position:absolute;left:50%;margin-left:-158px;top:114px;width:124px;height:auto}
 .warn{text-align:center;color:#ff0084;font-size:14px;line-height:22px}
@@ -1033,19 +1033,18 @@ small{display:block;font-size:13px;line-height:20px;color:#656565}
 .pc .one{font-size:18px;line-height:25px;margin-top:-10px}
 .box{background:#fff;color:#2d1f4e;border-radius:14px;padding:10px 14px}
 .box p{margin-top:2px}
-.gc{position:relative;display:block;isolation:isolate;background:#09ab00;border-radius:46px}
-.gc::before{content:"";position:absolute;z-index:-1;left:50%;width:calc(100vw + 160px);margin-left:calc(-50vw - 80px);top:12%;bottom:12%;background:#09ab00;border-radius:50%}
+.gc{position:relative;display:block;background:#09ab00;border-radius:46px}
 .gc small{color:#fff;font-size:16.63px;line-height:26px}
 .gc p{font-size:20.44px;line-height:32px;margin-top:8.4px}
 .gm{position:absolute;height:auto}
-.gc.a{width:487px;margin-left:calc(50% - 243.5px);min-height:408px;padding:106px 94.5px 0}
-.gm.m2{left:78px;top:334px;width:151px}
-.gc.b{width:530px;margin-left:calc(50% - 265px);margin-bottom:30px;min-height:444px;padding:106px 116px 0}
-.gm.m3{left:280px;top:360px;width:134px}
-.gc.c{width:713px;margin:-5px 0 101px calc(50% - 356.5px);min-height:598px;padding:117px 181.5px 0}
+.gc.a{width:calc(487 * var(--u));margin-left:calc(50% - 243.5 * var(--u));min-height:calc(408 * var(--u));padding:calc(106 * var(--u)) calc(94.5 * var(--u)) 0}
+.gm.m2{left:calc(78 * var(--u));top:calc(334 * var(--u));width:calc(151 * var(--u))}
+.gc.b{width:calc(530 * var(--u));margin-left:calc(50% - 265 * var(--u));margin-bottom:calc(30 * var(--u));min-height:calc(444 * var(--u));padding:calc(106 * var(--u)) calc(116 * var(--u)) 0}
+.gm.m3{left:calc(280 * var(--u));top:calc(360 * var(--u));width:calc(134 * var(--u))}
+.gc.c{width:calc(713 * var(--u));margin:calc(-5 * var(--u)) 0 calc(101 * var(--u)) calc(50% - 356.5 * var(--u));min-height:calc(598 * var(--u));padding:calc(117 * var(--u)) calc(181.5 * var(--u)) 0}
 .gc.c .sh{padding-left:10px;margin-bottom:12px}
 .gc.c p{font-size:17px;line-height:26px;margin:0 0 12px}
-.gm.mb{left:341px;top:475px;width:147px}
+.gm.mb{left:calc(341 * var(--u));top:calc(475 * var(--u));width:calc(147 * var(--u))}
 .note{font-weight:400;font-size:15px;line-height:23px}
 .tc{background:#1a0a3f;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px}
 .tc h3{color:#60e6fd;font-size:18px;line-height:25px}
