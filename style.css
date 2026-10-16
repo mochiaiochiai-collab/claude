@@ -41,9 +41,9 @@ body.phone .phone-only { display: block; }
   transform: translate(-50%, -50%) scale(var(--s, 1)); transform-origin: center; background: var(--bg-page);
 }
 .hd {
-  position: absolute; left: 0; top: 0; width: 100%; height: 238px; overflow: hidden; z-index: 1;
+  position: absolute; left: 0; top: 0; width: 100%; height: 238px; z-index: 4; pointer-events: none;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 24px 40px; border-bottom: 2px solid var(--border); text-align: center;
+  padding: 24px 40px; text-align: center;
 }
 .hd-list, .hd-done { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .hd-title { margin: 0; font-family: var(--f-title); font-weight: 400; font-size: 88px; line-height: 1.5; white-space: nowrap; }
