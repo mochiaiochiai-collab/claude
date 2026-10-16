@@ -1033,7 +1033,8 @@ small{display:block;font-size:13px;line-height:20px;color:#656565}
 .pc .one{font-size:18px;line-height:25px;margin-top:-10px}
 .box{background:#fff;color:#2d1f4e;border-radius:14px;padding:10px 14px}
 .box p{margin-top:2px}
-.gc{position:relative;display:block;background:#09ab00;border-radius:46px}
+.gc{position:relative;display:block;isolation:isolate;background:#09ab00;border-radius:46px}
+.gc::before{content:"";position:absolute;z-index:-1;left:50%;width:calc(100vw + 160px);margin-left:calc(-50vw - 80px);top:12%;bottom:12%;background:#09ab00;border-radius:50%}
 .gc small{color:#fff;font-size:16.63px;line-height:26px}
 .gc p{font-size:20.44px;line-height:32px;margin-top:8.4px}
 .gm{position:absolute;height:auto}
