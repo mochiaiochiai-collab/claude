@@ -52,6 +52,23 @@ function run(N, seed = 1) {
     if (/（）|、、|。。/.test(text)) fail('空のカッコや重なった句読点', `${tag} ${text.match(/.{10}(（）|、、|。。).{10}/)?.[0]}`);
     if (/<b>x<\/b>/.test(html)) fail('名前がエスケープされてない', tag);
 
+    // 1b. 保存するHTML（結果ファイル）：落ちない・変な文字がない・名前のエスケープ・全員ぶんの年齢と区切り
+    try {
+      const out = K.resultHtml(r, now, {});
+      const body = strip(out.slice(out.indexOf('<body>')));
+      if (/undefined|NaN|null|\[object/.test(body)) fail('結果HTMLに undefined/NaN', tag);
+      if (/（）|、、|。。/.test(body)) fail('結果HTMLに空のカッコや重なった句読点', `${tag} ${body.match(/.{10}(（）|、、|。。).{10}/)?.[0]}`);
+      if (/<b>x<\/b>/.test(out)) fail('結果HTMLで名前がエスケープされてない', tag);
+      const buckets = (out.match(/class="tc/g) || []).length;
+      if (buckets < 5 || buckets > 6) fail('結果HTMLの10年の区切りの数', `${tag} ${buckets}`);
+      if ((out.match(/class="tr"/g) || []).length !== buckets * people.length) fail('結果HTMLの年表の行数', tag);
+      if ((out.match(/class="pc"/g) || []).length !== people.length) fail('結果HTMLのひとりずつの数', tag);
+      if (new Set(out.match(/<h2>この家は|<h2>[^<]*<\/h2>/g)).size < 1) fail('結果HTMLに見出しがない', tag);
+    } catch (e) {
+      fail('結果HTMLで落ちた', `${tag} ${e.message}`);
+      continue;
+    }
+
     // 2. 同じ段落が2回出てない
     const paras = [...html.matchAll(/<p>([\s\S]*?)<\/p>/g)].map(m => m[1].trim()).filter(t => t.length > 20);
     // 子どもの関わり方の項目：名前だけちがう同じ文も重複として数える

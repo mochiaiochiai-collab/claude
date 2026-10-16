@@ -61,6 +61,17 @@ fam.pairs.forEach(p => assert.ok(p.score >= 20 && p.score <= 98));
 const html = K.renderReport(fam);
 assert.ok(!html.includes('<b>D</b>') && html.includes('&lt;b&gt;D&lt;/b&gt;'), '名前はエスケープ');
 assert.ok(!/undefined|NaN/.test(html), 'undefined/NaN が出てない');
+// 保存する結果HTML：構成・名前のエスケープ・見出しが家ごとにちがう
+const out = K.resultHtml(fam, new Date(2026, 9, 18), {});
+['この家は・・・', '３つの占いからあぶり出す個性', 'これから10年の流れ', 'これからどう育ってく？？', '円満・開運ポイント', 'viewport'].forEach(k => assert.ok(out.includes(k), k));
+assert.ok(!out.includes('<b>D</b>') && out.includes('&lt;b&gt;D&lt;/b&gt;'), 'HTMLでも名前はエスケープ');
+assert.ok(!/undefined|NaN/.test(out), 'HTMLに undefined/NaN が出てない');
+const titles = new Set();
+for (let i = 0; i < 40; i++) {
+  const ps = [0, 1, 2].map(j => ({ name: 'p' + j, date: { y: 1950 + ((i * 7 + j * 13) % 60), m: 1 + ((i + j * 5) % 12), d: 1 + ((i * 3 + j) % 28) } }));
+  titles.add(K.familyReading(ps, new Date(2026, 9, 18)).house.title);
+}
+assert.ok(titles.size >= 8, `見出しがいろいろ出る（${titles.size}通り）`);
 console.log('family tests passed', fam.house.title, fam.pairs.map(p => p.score).join(','));
 
 // 九星（立春で区切った年）

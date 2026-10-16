@@ -270,6 +270,10 @@
 
   // ---------- 家族全体 ----------
 
+  const EXPECT = [1.1, 1.1, 1.6, 1.1, 1.1];
+  // 見出し：いちばん多い五行と少ない五行の組み合わせ（20通り）。これに「要の人」「いちばんの相棒」の名前を足して使う
+  const TITLE_HEAD = ['伸びしろ満点で', 'にぎやかで', 'どっしり構えてて', 'けじめがきいてて', 'マイペースで'];
+  const TITLE_TAIL = ['新しい風待ちの家', 'ちょっと照れ屋の家', '集まるのがむずかしい家', 'ルールはゆるめの家', 'ひと息つく余白がほしい家'];
   const HOUSE = [
     { title: 'すくすく伸びる森の家', strong: '木が多い家は、伸びしろの家。みんな向上心があって、新しいことに前向きや。', weak: '木が少なめ。新しいことを始める勢いは、家族で意識して作ろ。週末に行ったことない場所へ行くとかな。' },
     { title: '笑い声がやまん太陽の家', strong: '火が多い家は、にぎやかな家。笑い声も口ゲンカも大きめ。', weak: '火が少なめ。気持ちを言葉にするのが照れくさい家かも。「ありがとう」を声に出すだけで空気が変わるで。' },
@@ -465,7 +469,10 @@
 
     const g = [0, 0, 0, 0, 0];
     charts.forEach(c => c.g.forEach((v, k) => { g[k] += v; }));
-    const order = g.map((v, k) => k).sort((x, y) => g[y] - g[x] || x - y);
+    // 土は十二支の4/12を占めるので、生数のまま比べると土ばかり「多い」になる。
+    // 人数ぶんの平均（1人あたり 木1.1・火1.1・土1.6・金1.1・水1.1）とのずれで比べる
+    const dev = g.map((v, k) => v - EXPECT[k] * charts.length);
+    const order = g.map((v, k) => k).sort((x, y) => dev[y] - dev[x] || g[y] - g[x] || x - y);
     const w = [0, 0, 0, 0];
     charts.forEach(c => { w[c.sun.el]++; w[c.moon.sign.el]++; });
 
@@ -476,11 +483,15 @@
       return mine.reduce((s, p) => s + p.score, 0) / mine.length;
     });
 
+    const hub = charts[hubScores.indexOf(Math.max(...hubScores))];
+    const best = sorted[0];
     return {
       now, charts, gens, pairs, gogyo: g, strong: order[0], weak: order[4], west: w, avg,
-      best: sorted[0], watch: sorted[sorted.length - 1],
-      hub: charts[hubScores.indexOf(Math.max(...hubScores))],
-      house: HOUSE[order[0]],
+      best, watch: sorted[sorted.length - 1], hub,
+      house: Object.assign({}, HOUSE[order[0]], {
+        title: TITLE_HEAD[order[0]] + '、' + TITLE_TAIL[order[4]],
+        sub: `要は${hub.name}、いちばんの相棒は${best.a.name}と${best.b.name}`,
+      }),
     };
   }
 
@@ -506,10 +517,9 @@
 
   const KEY_GROUP = { 比肩: 'hikou', 劫財: 'hikou', 食神: 'shokushou', 傷官: 'shokushou', 偏財: 'zai', 正財: 'zai', 偏官: 'kan', 正官: 'kan', 偏印: 'in', 印綬: 'in' };
 
-  function renderTimeline(c, now) {
+  function timelineItems(c, now) {
     const today = toYmd(now);
     const y0 = pillars(today).solarYear;
-    const child = ageAt(c.date, today) <= 18;
     const items = [];
     let y = y0;
     while (y < y0 + 10) {
@@ -528,6 +538,12 @@
     items.push({ from: kFrom, to: prevDay(risshunDate(cy + 1)), key: 'kyusei', y: cy });
     items.sort((a, b2) => a.y - b2.y || (a.key === 'kyusei' ? 1 : -1));
 
+    return { items, today };
+  }
+
+  function renderTimeline(c, now) {
+    const { items, today } = timelineItems(c, now);
+    const child = ageAt(c.date, today) <= 18;
     const own = KEY_GROUP[c.chuushin];
     return `<ul class="k-time">${items.map(it => {
       const when = `<span class="k-when">${it.from === today ? 'いま' : fmtJa(it.from)}〜${fmtJa(it.to)}</span><span class="k-age">${spanLabel(c.date, it.from, it.to)}</span>`;
@@ -658,17 +674,19 @@
     return { why: `点数がいちばん低い組（${p.score}点）`, reframe: 'とはいえ大きな衝突の形やありません。', medEl: null };
   }
 
+  const verdictOf = avg => (avg >= 70 ? 'かなりええ家' : avg >= 60 ? 'バランスのええ家' : avg >= 50 ? '個性がぶつかり合う、伸びしろのある家' : 'お互いを鍛え合う家');
+
   function renderReport(r) {
     const { charts, gens, now } = r;
     const flow = flowOf(charts);
     const kids = gens.length >= 2 ? gens[gens.length - 1] : [];
     const parents = gens.length >= 2 ? gens[gens.length - 2] : [];
-    const verdict = r.avg >= 70 ? 'かなりええ家' : r.avg >= 60 ? 'バランスのええ家' : r.avg >= 50 ? '個性がぶつかり合う、伸びしろのある家' : 'お互いを鍛え合う家';
+    const verdict = verdictOf(r.avg);
     const hook = flow.chain ? '五行が一本の流れでつながってまっせ' : flow.present.size === 5 ? '五行が全部そろてまっせ' : 'ちょっとおもろい配置してまっせ';
     const out = [];
 
-    out.push(`<h1>この家、${hook}</h1>
-      <p>四柱推命と九星気学と西洋占星術、三つ重ねて見ました。<br>結論から言うと、<b>${verdict}</b>です。理由を順に書きますわ。</p>`);
+    out.push(`<h1>この家は、${r.house.title}</h1>
+      <p>${esc(r.house.sub)}。${hook}。<br>四柱推命と九星気学と西洋占星術、三つ重ねて見ました。結論から言うと、<b>${verdict}</b>です。理由を順に書きますわ。</p>`);
 
     // 顔ぶれ
     out.push(`<section class="k-sec"><h2>まず、${charts.length}人の顔ぶれ</h2>
@@ -704,7 +722,7 @@
       struct.push(`<blockquote>この家で、日干の五行が<b>誰からも育ててもろてへん</b>のは${lonely.map(nm).join('と')}です。<br>人を生かす側やのに、その人を養う${lonely.map(c => GOGYO[(c.el + 4) % 5]).filter((v, i, a) => a.indexOf(v) === i).join('・')}が家の中におらん。</blockquote>`);
     }
     out.push(`<section class="k-sec"><h2>で、この家の構造なんですけど</h2>${struct.join('')}
-      <p>ここまでは日干（本人の1字）で見た話。家族全員の命式を全部（年・月・日の柱の6文字×${charts.length}人）足して数えると、${GOGYO[r.strong]}がいちばん多くて${GOGYO[r.weak]}がいちばん少ない。${r.house.strong}${HOUSE[r.weak].weak}</p></section>`);
+      <p>ここまでは日干（本人の1字）で見た話。家族全員の命式を全部（年・月・日の柱の6文字×${charts.length}人）足して数えて、ふつうの家の平均とくらべると、${GOGYO[r.strong]}が多めで${GOGYO[r.weak]}が少なめ。${r.house.strong}${HOUSE[r.weak].weak}</p></section>`);
 
     // ひとりずつ（若い世代から）
     const orderPeople = gens.slice().reverse().flat();
@@ -798,6 +816,244 @@
     const foot = `\n\n${'='.repeat(24)}\n※ 占いはエンタメです。四柱推命・九星気学・西洋占星術の決まりごとから計算してますが、科学的根拠はありません。\n`;
     return head + t + foot;
   }
+
+  // ---------- 結果ファイル（HTML）：ケータイに保存して読む用 ----------
+  // 構成：①3つの占いでひとりずつ → ②これから10年 → ③お互いにどう育つか → ④円満・開運ポイント
+
+  const STEM_NAME = ['大木', 'つる草', '太陽', 'ろうそくの灯', '山', '畑の土', '鋼', '宝石', '大河', '雨つゆ'];
+  const STEM_BRIEF = [
+    'まっすぐ上に伸びる木。曲がったことが嫌いで、頼られると張り切る',
+    'しなやかなつる草。折れへんしぶとさが本体',
+    'おるだけで場が明るなる',
+    '静かやけど、暗いとこでいちばん頼りになる火',
+    'どっしり構えて、何があっても動じへん',
+    '人を育てて場を整える、面倒見のええ土',
+    '白黒はっきり、決めたら速い',
+    'センスがよくて、本物がわかる',
+    'おおらかでスケールがでかい自由人',
+    'やさしくて気配り上手、勘が鋭い',
+  ];
+  // 家族に足りへん五行ごとの、日ごろのひと工夫
+  const WEAK_TIP = ['週末に、行ったことない場所へ行ってみる。', '気持ちを言葉にする日をつくる。', 'ごはんの時間だけでも揃える。', '家のルールを1個だけ決める。', 'ぼーっとする余白の時間をつくる。'];
+  // 日干の五行ごとの、育ち方のひとこと
+  const GROW_LINE = [
+    'まっすぐ伸びるぶん、待ってもらえると大きく育つ。',
+    '家を照らす存在やから、元気がないと家全体が暗なる。',
+    '家の土台になる人。ため込みやすいから、「ありがとう」で軽なる。',
+    'まじめにがんばりすぎるから、ゆるめたったら伸びる。',
+    '気配り上手。ひとりでぼーっとする時間が充電になる。',
+  ];
+  const plain = s => s.replace(/<[^>]+>/g, '');
+  const joinNames = list => list.map(c => esc(c.name)).join('・');
+  const firstSentence = s => s.split('。')[0];
+
+  function personBlurbs(c, now) {
+    const child = ageOn(c.date, now) <= 18;
+    const head = (TSUHEN[c.chuushin][child ? 0 : 1].match(/^\*\*(.+?)。?\*\*/) || [, '芯のある人'])[1].replace(/。$/, '');
+    const four = `${pillarStr(c.p.day)}「${STEM_NAME[c.dayStem]}」。${STEM_BRIEF[c.dayStem]}。中心星は${c.chuushin}で、${head}。`;
+    const k = KYUSEI[c.kyusei];
+    const kImg = (k[2].match(/「(.+?)」/) || [, ''])[1];
+    const kRest = firstSentence(k[2].replace(/^\*\*.+?\*\*\s*/, ''));
+    const nine = `${k[0]}「${kImg}」。${kRest}。`;
+    const moon = c.moon.alt ? `${c.moon.sign.name}※` : c.moon.sign.name;
+    const west = `${c.sun.name}（${ELEMENTS[c.sun.el]}）。${c.sun.sun}。月は${moon}で、${c.moon.sign.moon}。`;
+    return { four, nine, west };
+  }
+
+  // 10年を、全員そろって同じ区切りで並べる（五行ごとに2年ずつ切り替わるので、人がちがっても区切りは同じ）
+  function decadeBuckets(charts, now) {
+    const today = toYmd(now);
+    const per = charts.map(c => timelineItems(c, now));
+    const base = per[0].items.filter(i => i.key !== 'kyusei');
+    return base.map(b => {
+      const endY = b.to.y - 1;
+      const first = b.from.y === today.y && b.from.m === today.m && b.from.d === today.d;
+      const label = first ? `いま〜${b.to.y}年${b.to.m}月` : `${b.from.y}〜${b.to.y}年`;
+      const rows = charts.map((c, i) => {
+        const ph = per[i].items.find(it => it.key !== 'kyusei' && it.y === b.y);
+        const ky = per[i].items.find(it => it.key === 'kyusei' && it.y >= b.y && it.y <= endY);
+        const [age, grade] = spanLabel(c.date, ph.from, ph.to).split('・');
+        return { c, key: ph.key, ky: !!ky, age: grade ? `${age}（${grade}）` : age };
+      });
+      return { label, first, to: b.to, rows };
+    });
+  }
+
+  function resultHtml(r, now, art = {}) {
+    const { charts, gens } = r;
+    const flow = flowOf(charts);
+    const kids = gens.length >= 2 ? gens[gens.length - 1] : [];
+    const e = esc;
+    const img = (k, cls) => (art[k] ? `<img class="${cls}" src="${art[k]}" alt="">` : '');
+
+    // ---- 見どころ ----
+    const facts = [];
+    charts.forEach(c => {
+      const br = [c.p.year[1], c.p.month[1], c.p.day[1]];
+      const sango = SANGO.find(gp => gp.every(x => br.includes(x)));
+      if (sango) facts.push(`${e(c.name)}は、生まれの干支に${sango.map(x => BRANCHES[x]).join('・')}がそろう「三合${GOGYO[BRANCH_EL[sango[1]]]}局」。百人に一人ちょっとの配置です。`);
+    });
+    charts.forEach(c => {
+      const k = c.g.indexOf(Math.max(...c.g));
+      if (c.g[k] >= 5) facts.push(`${e(c.name)}は命式の6文字のうち${c.g[k]}文字が${GOGYO[k]}。ものすごく「${GOGYO[k]}」の人です。`);
+    });
+    r.pairs.forEach(p => {
+      if (hasPair(KANGO, p.a.dayStem, p.b.dayStem)) facts.push(`${e(p.a.name)}と${e(p.b.name)}は日干が干合。理屈抜きで惹かれ合う縁です。`);
+      if (p.a.p.day[0] === p.b.p.day[0] && p.a.p.day[1] === p.b.p.day[1]) facts.push(`${e(p.a.name)}と${e(p.b.name)}は日柱が同じ（${pillarStr(p.a.p.day)}）。性格の土台がそっくりです。`);
+    });
+    if (!facts.length) facts.push(`日干は${new Set(charts.map(c => c.dayStem)).size}種類。それぞれちがう個性がそろってます。`);
+
+    // ---- 10年 ----
+    const buckets = decadeBuckets(charts, now);
+    const score = bk => bk.rows.filter(x => x.ky).length * 2 + bk.rows.filter(x => x.key === 'kan').length;
+    const peak = buckets.reduce((m, bk) => (score(bk) > score(m) ? bk : m), buckets[0]);
+    let peakTitle, peakText;
+    if (score(peak) >= 2) {
+      const ky = peak.rows.filter(x => x.ky).map(x => x.c);
+      const kan = peak.rows.filter(x => x.key === 'kan').map(x => x.c);
+      const parts = [];
+      if (ky.length) parts.push(`${joinNames(ky)}の九星の節目`);
+      if (kan.length) parts.push(`${joinNames(kan)}の「責任と向き合う」`);
+      peakTitle = peak.first ? `いまが家族の山場（${peak.label}）` : `家族の山場は${peak.label}`;
+      peakText = `${parts.join('、')}が重なります。`;
+      const bright = buckets[0].rows.filter(x => x.key === 'shokushou').map(x => x.c);
+      if (!peak.first && bright.length) peakText += `逆に${buckets[0].label}は、${joinNames(bright)}の持ち味が外に出てくる時期。好きなことを止めんといてな。`;
+    } else {
+      peakTitle = 'ゆっくり育つ10年';
+      peakText = '大きな重なりはなく、それぞれのペースで進みます。焦らんと、その時期の過ごし方を大事に。';
+    }
+
+    // ---- 育ち方 ----
+    let flowHead, flowLine, flowTail;
+    if (flow.chain) {
+      flowHead = '家族の五行は、一本につながってます';
+      flowLine = flow.chain.map(el => `${joinNames(charts.filter(c => c.el === el))}（${GOGYO[el]}）`).join(' → ');
+      flowTail = '前の人が、次の人を育てる形です。';
+    } else if (flow.links.length) {
+      flowHead = '家族の五行は、こうつながってます';
+      flowLine = flow.links.map(([a, c]) => `${e(a.name)}（${GOGYO[a.el]}）→ ${e(c.name)}（${GOGYO[c.el]}）`).join('、');
+      flowTail = '矢印の元の人が、先の人を育てる形です。';
+    } else {
+      flowHead = '家族の五行は、それぞれ自立型';
+      flowLine = '日干どうしで直接育て合う関係はありません。';
+      flowTail = 'それぞれが自分の場所で立ってる家です。';
+    }
+    const growth = c => {
+      const giver = charts.filter(o => o.el === (c.el + 4) % 5);
+      const taker = charts.filter(o => o.el === (c.el + 1) % 5);
+      const zero = c.g.map((v, k) => (v === 0 ? k : -1)).filter(k => k >= 0);
+      let s = giver.length ? `${joinNames(giver)}（${GOGYO[giver[0].el]}）に育てられて` : `自分を育てる${GOGYO[(c.el + 4) % 5]}が家におらん。${GOGYO_MEAN[(c.el + 4) % 5]}は外から借りる子で`;
+      s += taker.length ? `、${joinNames(taker)}を育てる。` : '、自分の道を進む。';
+      s += GROW_LINE[c.el];
+      if (zero.length >= 2) s += `命式で${zero.map(k => GOGYO[k]).join('・')}がゼロやから、足りんもんは家族から借りてええ。`;
+      return s;
+    };
+
+    // ---- 注意・コツ ----
+    const w = r.watch;
+    const reason = pairReason(w);
+    const med = reason.medEl === null ? null : charts.find(c => c !== w.a && c !== w.b && c.el === reason.medEl);
+    const warnText = `${e(w.a.name)}と${e(w.b.name)}：${plain(reason.why)}。${plain(reason.reframe)}${med ? `間に${e(med.name)}が入ったら収まります。` : ''}`;
+    const tips = [];
+    if (w.tip) tips.push(`${firstSentence(w.tip)}。`);
+    tips.push(`${e(r.hub.name)}へ「ありがとう」を声に出す。`);
+    tips.push(WEAK_TIP[r.weak]);
+    if (kids.length) tips.push(`${joinNames([kids[kids.length - 1]])}は「${CARE[kids[kids.length - 1].dayStem][0]}」のが合う。`);
+    tips.push(score(peak) >= 2 ? `${peak.label}は家族の節目。進路や大事な話は、早めに時間をとる。` : '月に1回、家族で今月の話をする日をつくる。');
+
+    const made = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+    const names = charts.map(c => e(c.name));
+    const people = charts.map(c => {
+      const t = personBlurbs(c, now);
+      return `<section class="pc"><h3>${e(c.name)}</h3><p class="one">${STEM_SHORT[c.dayStem]}</p>
+        <div class="box"><small>四柱推命</small><p>${t.four}</p></div>
+        <div class="box"><small>九星気学</small><p>${t.nine}</p></div>
+        <div class="box"><small>西洋占星術</small><p>${t.west}</p></div></section>`;
+    }).join('');
+    const timeline = buckets.map(bk => `<section class="tc${bk === peak && score(peak) >= 2 ? ' peak' : ''}"><h3>${bk.label}</h3>${bk.rows.map(x => `<div class="tr"><small>${e(x.c.name)}　${x.age}</small><b>${PHASE[x.key][0]}${x.ky ? '　★節目' : ''}</b></div>`).join('')}</section>`).join('');
+    const growCards = charts.map(c => `<section class="gw"><small>${e(c.name)}</small><p>${growth(c)}</p></section>`).join('');
+
+    return `<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Family fortune</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Angkor&family=Rubik+Bubbles&family=Noto+Sans+JP:wght@400;700&display=swap">
+<style>${RESULT_CSS}</style></head>
+<body><main>
+<header class="top"><h1>Family<br>fortune</h1>${img('bat', 'bat')}</header>
+<p class="warn">占いはエンタメです。科学的根拠はありません。<br>そしてAIは間違ってるかもしれません！</p>
+<div class="chips">${names.map(n => `<span>${n}</span>`).join('')}</div>
+<ol class="toc"><li>３つの占いの視点からあぶり出す個性</li><li>これから10年の流れ</li><li>これからどう育ってく？？</li><li>円満・開運ポイント</li></ol>
+<section class="lead"><p>ひとことでいうと・・・この家は・・・</p><h2>${e(r.house.title)}</h2></section>
+${img('m1', 'mon')}
+<div class="sh"><span class="no">1.</span><h2>３つの占いからあぶり出す個性</h2></div>
+${people}
+<div class="gc"><small>ここが見どころ</small><p>${facts.slice(0, 2).join('')}</p></div>
+${img('m2', 'mon')}
+<div class="sh"><span class="no">2.</span><h2>これから10年の流れ</h2></div>
+<p class="note">立春から次の立春までを1年として並べました。★は九星の節目（9年にいっぺんの区切り）です。</p>
+${timeline}
+<div class="gc"><small>${e(peakTitle)}</small><p>${peakText}</p></div>
+${img('m3', 'mon')}
+<div class="sh"><span class="no">3.</span><h2>これからどう育ってく？？</h2></div>
+<section class="flow"><small>${flowHead}</small><b>${flowLine}</b><p>${flowTail}</p></section>
+${growCards}
+<section class="caution"><small>一個だけ注意</small><p>${warnText}</p></section>
+<div class="gc tips"><div class="sh"><span class="no">4.</span><h2>円満・開運ポイント</h2></div><ol>${tips.map(t => `<li>${t}</li>`).join('')}</ol></div>
+<footer>${img('bottom', 'mon')}<p class="date">${made}</p></footer>
+</main></body></html>`;
+  }
+
+  const RESULT_CSS = `
+*{box-sizing:border-box}html{background:#2d1f4e}
+body{margin:0;background:#2d1f4e;color:#fff;font:700 16px/1.6 "Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:430px;margin:0 auto;padding:0 20px 40px;overflow-x:hidden}
+h1,h2,h3,p,ol,ul{margin:0}
+small{display:block;font-size:13px;color:#656565}
+.top{position:relative;margin:0 -20px;padding:48px 20px 56px;background:#09ab00;border-radius:0 0 54px 54px;text-align:center;min-height:210px}
+.top::after{content:"";position:absolute;left:30px;right:30px;bottom:-46px;height:60px;background:radial-gradient(circle at 28px 30px,#09ab00 0 28px,transparent 29px) 0 0/90px 60px repeat-x,radial-gradient(circle at 70px 24px,#09ab00 0 20px,transparent 21px) 0 0/90px 60px repeat-x}
+.top h1{font:400 44px/1.15 "Rubik Bubbles","Noto Sans JP",sans-serif;letter-spacing:1px}
+.bat{position:absolute;left:12px;top:150px;width:98px;z-index:2}
+.warn{margin-top:72px;text-align:center;color:#ff0084;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:24px 0}
+.chips span{background:#60e6fd;color:#2d1f4e;border-radius:999px;padding:2px 14px;font-size:15px}
+.toc{padding-left:42px;margin:28px 0}
+.toc li{padding:1px 0}
+.lead{background:#1a0a3f;border-radius:28px;padding:20px;margin:32px 0}
+.lead p{font-size:15px}
+.lead h2{color:#60e6fd;font-size:28px;line-height:1.3;margin-top:8px}
+.mon{display:block;margin:28px auto 4px;max-width:150px;height:auto}
+.sh{display:flex;align-items:flex-end;gap:12px;margin:12px 0}
+.sh .no{font:400 30px/1.2 "Rubik Bubbles","Noto Sans JP",sans-serif}
+.sh h2{font-size:20px;line-height:1.4;padding-bottom:4px}
+.pc{background:#1a0a3f;border-radius:24px;padding:20px;margin:12px 0}
+.pc h3{color:#60e6fd;font-size:22px;line-height:1.3}
+.pc .one{font-size:18px;margin:2px 0 12px}
+.box{background:#fff;color:#2d1f4e;border-radius:14px;padding:10px 14px;margin-top:12px}
+.box p{margin-top:2px}
+.gc{position:relative;background:#09ab00;border-radius:46px;padding:30px 24px;margin:64px -6px}
+.gc::before,.gc::after{content:"";position:absolute;left:18px;right:18px;height:60px;background:radial-gradient(circle at 28px 34px,#09ab00 0 28px,transparent 29px) 0 0/90px 60px repeat-x,radial-gradient(circle at 70px 40px,#09ab00 0 20px,transparent 21px) 0 0/90px 60px repeat-x}
+.gc::before{top:-46px}.gc::after{bottom:-46px;transform:scaleY(-1)}
+.gc small{color:#fff;font-size:14px}.gc p{font-size:18px;margin-top:2px}
+.note{font-weight:400;margin:4px 0 12px}
+.tc{background:#1a0a3f;border-radius:20px;padding:16px;margin:12px 0}
+.tc.peak{outline:2px solid #60e6fd}
+.tc h3{color:#60e6fd;font-size:18px;margin-bottom:10px}
+.tr{background:#fff;color:#2d1f4e;border-radius:12px;padding:8px 12px;margin-top:10px}
+.tr b{display:block;font-size:17px;line-height:1.4}
+.flow{background:rgba(255,255,255,.2);border-radius:20px;padding:16px;margin:12px 0}
+.flow small{color:#fff;font-size:14px}.flow b{display:block;color:#60e6fd;font-size:18px;line-height:1.5;margin:6px 0}
+.flow p{font-weight:400}
+.gw{background:#fff;color:#2d1f4e;border-radius:20px;padding:16px;margin:12px 0}
+.gw p{margin-top:4px}
+.caution{border:2px solid #60e6fd;border-radius:20px;padding:16px;margin:12px 0}
+.caution small{color:#60e6fd;font-size:14px}.caution p{margin-top:6px}
+.tips .sh{margin:0 0 8px}.tips ol{padding-left:24px}.tips li{font-size:17px;margin:10px 0}
+.tips .no{font-size:30px}
+footer{text-align:center;margin-top:20px}
+.date{font:400 14px/1.6 "Angkor","Noto Sans JP",sans-serif;margin-top:20px}
+`;
 
   // ---------- QRコード用：生年月日と名前をURLの「#」の後ろに入れる ----------
   // 「#」より後ろはサーバーに送られへんので、生年月日はお客さんのケータイの中だけで使われる。
@@ -932,21 +1188,35 @@
     if (shared) {
       doc.body.classList.add('phone');
       const now = new Date();
-      const made = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
-      const text = reportText(renderReport(familyReading(shared, now)), made);
+            const reading = familyReading(shared, now);
       $('k-dl-names').innerHTML = shared.map(p => `<div>${esc(p.name)}</div>`).join('');
       const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-      $('k-dl').addEventListener('click', () => {
-        const url = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/plain;charset=utf-8' }));
-        const a = doc.createElement('a');
-        a.href = url;
-        a.download = `uranai_${stamp}.txt`; // 日本語のファイル名は落とされるブラウザがあるので英数字にする
-        doc.body.appendChild(a); a.click(); a.remove();
+      // キャラクター画像は押す前に読み込んでおく（押した瞬間に保存を始めたいので）
+      const artReady = new Promise(resolve => {
+        if (window.RESULT_ART) return resolve(window.RESULT_ART);
+        const sc = doc.createElement('script');
+        sc.src = 'result-art.js';
+        sc.onload = () => resolve(window.RESULT_ART || {});
+        sc.onerror = () => resolve({});
+        doc.head.appendChild(sc);
+      });
+      let art = null;
+      artReady.then(a => { art = a; });
+      const save = a => {
+        const html = resultHtml(reading, now, a);
+        const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+        const link = doc.createElement('a');
+        link.href = url;
+        link.download = `uranai_${stamp}.html`; // 日本語のファイル名は落とされるブラウザがあるので英数字にする
+        doc.body.appendChild(link); link.click(); link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 60000);
         $('p-dl').hidden = true;
         $('p-saved').hidden = false;
         window.scrollTo(0, 0);
-      });
+      };
+      $('k-dl').addEventListener('click', () => { if (art) save(art); else artReady.then(save); });
+      // 保存したあとの画面：ページを閉じる（閉じられへんブラウザでは白紙にする）
+      $('k-x').addEventListener('click', () => { window.close(); location.replace('about:blank'); });
       return;
     }
 
@@ -1083,8 +1353,8 @@
     // 結果のあらまし（くわしい文章はケータイのファイルに入ってる）
     function showSummary(r) {
       $('k-sum-title').textContent = r.house.title;
-      $('k-sum-text').textContent = '四柱推命・九星気学・西洋占星術で見ると、' + r.house.strong;
-      $('k-sum-list').innerHTML = r.charts.map(c => `
+      $('k-sum-text').textContent = `四柱推命・九星気学・西洋占星術で見ると、${verdictOf(r.avg)}です。`;
+      $('k-sum-list').innerHTML = '<div class="sum-row sum-head"><span></span><span>四柱推命</span><span>九星気学</span><span>西洋占星術</span></div>' + r.charts.map(c => `
         <div class="sum-row"><span>${esc(c.name)}</span><span>${pillarStr(c.p.day)}</span><span>${KYUSEI[c.kyusei][0]}${c.p.risshunDay ? '※' : ''}</span><span>${c.sun.name}${c.sunAlt ? '※' : ''}</span></div>`).join('');
     }
 
@@ -1118,7 +1388,7 @@
     go('list');
   }
 
-  const api = { reportText, encodeShare, decodeShare, shareUrl, ageAt, spanLabel, risshunDate, tsuhenOf, jdn, parseDigits, pillars, pillarStr, sunLongitude, sunSign, moonLongitude, moonSign, chart, compat, familyReading, renderReport, flowOf, kyuseiOfYear, personLabel, setupKazoku, STEMS, BRANCHES };
+  const api = { resultHtml, reportText, encodeShare, decodeShare, shareUrl, ageAt, spanLabel, risshunDate, tsuhenOf, jdn, parseDigits, pillars, pillarStr, sunLongitude, sunSign, moonLongitude, moonSign, chart, compat, familyReading, renderReport, flowOf, kyuseiOfYear, personLabel, setupKazoku, STEMS, BRANCHES };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => setupKazoku(document));
   root.Kazoku = api;
