@@ -1012,9 +1012,9 @@ main{max-width:430px;margin:0 auto;padding:0 20px 40px;overflow-x:hidden}
 h1,h2,h3,p,ol,ul{margin:0}
 small{display:block;font-size:13px;color:#656565}
 .top{position:relative;margin:0 -20px;padding:48px 20px 56px;background:#09ab00;border-radius:0 0 54px 54px;text-align:center;min-height:210px}
-.top::after{content:"";position:absolute;left:30px;right:30px;bottom:-46px;height:60px;background:radial-gradient(circle at 28px 30px,#09ab00 0 28px,transparent 29px) 0 0/90px 60px repeat-x,radial-gradient(circle at 70px 24px,#09ab00 0 20px,transparent 21px) 0 0/90px 60px repeat-x}
+.top::after{content:"";position:absolute;left:30px;right:30px;bottom:-46px;height:60px;background:radial-gradient(circle at 28px 30px,#09ab00 0 28px,transparent 29px) 0 0/90px 60px round no-repeat,radial-gradient(circle at 70px 24px,#09ab00 0 20px,transparent 21px) 0 0/90px 60px round no-repeat}
 .top h1{font:400 44px/1.15 "Rubik Bubbles","Noto Sans JP",sans-serif;letter-spacing:1px}
-.bat{position:absolute;left:12px;top:150px;width:98px;z-index:2}
+.bat{position:absolute;left:10px;top:148px;width:104px;z-index:2}
 .warn{margin-top:72px;text-align:center;color:#ff0084;font-size:14px}
 .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:24px 0}
 .chips span{background:#60e6fd;color:#2d1f4e;border-radius:999px;padding:2px 14px;font-size:15px}
@@ -1033,7 +1033,7 @@ small{display:block;font-size:13px;color:#656565}
 .box{background:#fff;color:#2d1f4e;border-radius:14px;padding:10px 14px;margin-top:12px}
 .box p{margin-top:2px}
 .gc{position:relative;background:#09ab00;border-radius:46px;padding:30px 24px;margin:64px -6px}
-.gc::before,.gc::after{content:"";position:absolute;left:18px;right:18px;height:60px;background:radial-gradient(circle at 28px 34px,#09ab00 0 28px,transparent 29px) 0 0/90px 60px repeat-x,radial-gradient(circle at 70px 40px,#09ab00 0 20px,transparent 21px) 0 0/90px 60px repeat-x}
+.gc::before,.gc::after{content:"";position:absolute;left:18px;right:18px;height:60px;background:radial-gradient(circle at 28px 34px,#09ab00 0 28px,transparent 29px) 0 0/90px 60px round no-repeat,radial-gradient(circle at 70px 40px,#09ab00 0 20px,transparent 21px) 0 0/90px 60px round no-repeat}
 .gc::before{top:-46px}.gc::after{bottom:-46px;transform:scaleY(-1)}
 .gc small{color:#fff;font-size:14px}.gc p{font-size:18px;margin-top:2px}
 .note{font-weight:400;margin:4px 0 12px}
