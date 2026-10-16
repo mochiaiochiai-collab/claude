@@ -1143,7 +1143,7 @@ small{display:block;font-size:13px;line-height:20px;color:#656565}
     return qrLib;
   }
 
-  // ---------- 画面（Fortune Room） ----------
+  // ---------- 画面（Family Fortune） ----------
 
   const STORE = 'uranai.kazoku.v1';
   const MAX_PEOPLE = 10;

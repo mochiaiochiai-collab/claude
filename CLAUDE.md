@@ -25,7 +25,7 @@ Claude Code（クラウド）で作ってきたものを、デスクトップの
 | `family.js` | 暦・天文計算、占いの判定、結果HTML（`resultHtml`）の組み立て、QR 用の符号化、入力 UI、ケータイ用画面。node でも require できる |
 | `result-art.js` | 結果HTMLに埋め込むキャラ5体と緑の雲の形（`assets/r-*.png` を base64 にしたもの。`bat / m1 / m2 / m3 / bottom / cloud`）。ケータイでダウンロードを押す前に読み込む。作り直すときは `assets/r-*.png` を差し替えて、各 png を `data:image/png;base64,…` にして `window.RESULT_ART` の `bat / m1 / m2 / m3 / bottom` に入れる |
 | `index.html` / `style.css` / `assets/` | 画面。iPad 用（`ipad-only`）とケータイ用（`body.phone` のとき `phone-only`）を出し分け。`assets/` は Figma から書き出したキャラクターと雲の SVG |
-| `favicon.ico` / `icons/` / `manifest.webmanifest` | ファビコンとホーム画面のアイコン（Figma「favicon」39:3701 を3倍にして書き出したもの）。アプリ名は Family Fortune。ホーム画面に追加すると全画面（standalone）で開く |
+| `favicon.ico` / `icons/` / `manifest.webmanifest` | ファビコンとホーム画面のアイコン（Figma「favicon」39:3701 を3倍にして書き出したもの。紫の背景）。アプリ名は Family Fortune。ホーム画面に追加すると全画面（standalone）で開く |
 | `vendor/qrcode.js` | qrcode-generator 2.0.4（MIT）。iPad 側だけで読み込む |
 | `test.js` | テスト。`node test.js` |
 | `check.js` | ランダムな家族でレポートの矛盾を検査。`node check.js`（1万家族・約12秒）、`node check.js 100000` |
@@ -72,7 +72,7 @@ node check.js     # 「問題なし」になること
 - [x] 占いの計算と検証、関西弁レポート、QR → ケータイでテキストをダウンロードする流れ
 - [x] GitHub に push 済み（ブランチ `claude/fortune-telling-app-czkdno`）
 - [ ] **GitHub Pages の公開**：リポジトリの Settings → Pages → Source「Deploy from a branch」→ Branch `claude/fortune-telling-app-czkdno`・`/ (root)` → Save。公開後に `https://mochiaiochiai-collab.github.io/claude/` が開くか、QR からケータイでダウンロードまで通るかを確認する
-- [x] **新しいデザインをアプリに反映**（Figma「うらないの部屋 UI」 https://www.figma.com/design/lqojDwkLotKxQJgp0Usisi の「デザイン」セクション。名前は Fortune Room）
+- [x] **新しいデザインをアプリに反映**（Figma「うらないの部屋 UI」 https://www.figma.com/design/lqojDwkLotKxQJgp0Usisi の「デザイン」セクション。名前は Family Fortune。以前は Fortune Room）
   - 流れ：① 一覧（家族の行をタップ）→ ② ニックネーム（ひらがなキーボード、゛゜小つき）→ ③ 生年月日（数字10個）→ 一覧で「Let's Fortune !」→ ④ 結果案内（結果のあらましと QR、「Close」で全部消して最初へ）。ケータイは「Download」→「Saved !」
   - iPad は 1366×1024 の固定ステージを画面に合わせて拡大縮小（`--s`）。Figma と同じ配置のまま収まる。家族が多い時は一覧、結果の表だけがスクロール
   - ケータイは 390 幅が基準。キャラクターや雲は `assets/` の SVG（Figma から書き出し）。キャラは全部不透明100%（SVG の opacity を外してある。ブレンドは multiply のまま。目や口などの水色のパーツは通常ブレンド）
