@@ -1187,7 +1187,8 @@ small{display:block;font-size:13px;line-height:20px;color:#656565}
     const blobs = CLOUD_BLOBS.map(([x, y]) => `<img src="assets/cloud-blob.svg" alt="" style="left:calc(${x} * var(--n));top:calc(${y} * var(--n));width:calc(82.568 * var(--n));height:calc(77.895 * var(--n))">`).join('');
     const body = '<img src="assets/cloud-body.svg" alt="" style="left:calc(10.13 * var(--n));top:calc(55.31 * var(--n));width:calc(440.884 * var(--n));height:calc(166.695 * var(--n))">';
     const arrow = el.dataset.arrow ? '<img class="cl-arrow" src="assets/arrow-down.svg" alt="">' : '';
-    el.innerHTML = `${blobs}${body}<span class="cl-text">${el.dataset.text}</span>${arrow}`;
+    const label = el.dataset.img ? `<img class="cl-img" src="${el.dataset.img}" alt="${el.dataset.text}">` : `<span class="cl-text">${el.dataset.text}</span>`;
+    el.innerHTML = `${blobs}${body}${label}${arrow}`;
   }
 
   function setupKazoku(doc) {
