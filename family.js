@@ -1199,10 +1199,10 @@ small{display:block;font-size:13px;line-height:20px;color:#656565}
     if (shared) {
       doc.body.classList.add('phone');
       const now = new Date();
-            const reading = familyReading(shared, now);
+      const reading = familyReading(shared, now);
       $('k-dl-names').innerHTML = shared.map(p => `<div>${esc(p.name)}</div>`).join('');
       const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-      // キャラクター画像は押す前に読み込んでおく（押した瞬間に保存を始めたいので）
+      // キャラクター画像は押す前に読み込んでおく
       const artReady = new Promise(resolve => {
         if (window.RESULT_ART) return resolve(window.RESULT_ART);
         const sc = doc.createElement('script');
@@ -1211,21 +1211,34 @@ small{display:block;font-size:13px;line-height:20px;color:#656565}
         sc.onerror = () => resolve({});
         doc.head.appendChild(sc);
       });
-      let art = null;
-      artReady.then(a => { art = a; });
-      const save = a => {
-        const html = resultHtml(reading, now, a);
-        const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+      // 流れ：Open で結果をそのまま画面に出す → 画面の「Save」でファイルに保存 → Saved !
+      let html = null;
+      const build = a => { if (!html) html = resultHtml(reading, now, a); return html; };
+      const openView = a => {
+        const frame = doc.createElement('iframe');
+        frame.className = 'p-frame';
+        frame.title = '占いの結果';
+        frame.srcdoc = build(a);
+        $('p-view').insertBefore(frame, $('k-save'));
+        $('p-dl').hidden = true;
+        $('p-view').hidden = false;
+        doc.body.classList.add('viewing');
+        window.scrollTo(0, 0);
+      };
+      const save = () => {
+        const url = URL.createObjectURL(new Blob([build(window.RESULT_ART || {})], { type: 'text/html;charset=utf-8' }));
         const link = doc.createElement('a');
         link.href = url;
         link.download = `uranai_${stamp}.html`; // 日本語のファイル名は落とされるブラウザがあるので英数字にする
         doc.body.appendChild(link); link.click(); link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 60000);
-        $('p-dl').hidden = true;
+        $('p-view').hidden = true;
+        doc.body.classList.remove('viewing');
         $('p-saved').hidden = false;
         window.scrollTo(0, 0);
       };
-      $('k-dl').addEventListener('click', () => { if (art) save(art); else artReady.then(save); });
+      $('k-dl').addEventListener('click', () => artReady.then(openView));
+      $('k-save').addEventListener('click', save);
       // 保存したあとの画面：ページを閉じる（閉じられへんブラウザでは白紙にする）
       $('k-x').addEventListener('click', () => { window.close(); location.replace('about:blank'); });
       return;
