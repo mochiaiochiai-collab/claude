@@ -1193,6 +1193,8 @@ small{display:block;font-size:13px;line-height:20px;color:#656565}
   function setupKazoku(doc) {
     const $ = id => doc.getElementById(id);
     if (!$('k-people')) return;
+    // iPad の Safari：2本指のつまみズームも止める（iOS は viewport の指定だけやと効かへんので）
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => doc.addEventListener(ev, e => e.preventDefault()));
     doc.querySelectorAll('.cloud').forEach(buildCloud);
 
     const shared = typeof location !== 'undefined' && location.hash.length > 1 ? decodeShare(location.hash.slice(1)) : null;

@@ -17,6 +17,8 @@
   --f-num: "Angkor", "Noto Sans JP", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
+/* ダブルタップでのズームを止める（iPad でボタンを素早く押しても拡大されへん） */
+html, body, button, a, input { touch-action: manipulation; }
 html { background: var(--bg-page); }
 body {
   margin: 0; min-height: 100vh; background: var(--bg-page); color: var(--text-primary);
