@@ -23,7 +23,7 @@ Claude Code（クラウド）で作ってきたものを、デスクトップの
 | ファイル | 中身 |
 |---|---|
 | `family.js` | 暦・天文計算、占いの判定、結果HTML（`resultHtml`）の組み立て、QR 用の符号化、入力 UI、ケータイ用画面。node でも require できる |
-| `result-art.js` | 結果HTMLに埋め込むキャラ5体と緑の雲の形（`assets/r-*.png` を base64 にしたもの。`bat / m1 / m2 / m3 / bottom / cloud`）。ケータイでダウンロードを押す前に読み込む。作り直すときは `assets/r-*.png` を差し替えて、各 png を `data:image/png;base64,…` にして `window.RESULT_ART` の `bat / m1 / m2 / m3 / bottom` に入れる |
+| `result-art.js` | 結果HTMLに埋め込むキャラ5体と緑の雲の形（`assets/r-*.png` を base64 にしたもの。`bat / m1 / m2 / m3 / bottom / cloud / title / n1〜n4`（title は「Family Fortune」、n1〜n4 は見出しの「1.」〜「4.」。Rubik Bubbles の文字をオフラインでも崩さんように画像にしてある。白い文字を黒い背景で書き出して透過にしたもの））。ケータイでダウンロードを押す前に読み込む。作り直すときは `assets/r-*.png` を差し替えて、各 png を `data:image/png;base64,…` にして `window.RESULT_ART` の `bat / m1 / m2 / m3 / bottom` に入れる |
 | `index.html` / `style.css` / `assets/` | 画面。iPad 用（`ipad-only`）とケータイ用（`body.phone` のとき `phone-only`）を出し分け。`assets/` は Figma から書き出したキャラクターと雲の SVG |
 | `favicon.ico` / `icons/` / `manifest.webmanifest` | ファビコンとホーム画面のアイコン（Figma「favicon」39:3701 を3倍にして書き出したもの。紫の背景）。アプリ名は Family Fortune。ホーム画面に追加すると全画面（standalone）で開く |
 | `vendor/qrcode.js` | qrcode-generator 2.0.4（MIT）。iPad 側だけで読み込む |

@@ -974,6 +974,9 @@
     const timeline = buckets.map(bk => `<section class="tc"><h3>${bk.label}${bk === peak && score(peak) >= 2 ? '　家族の山場' : ''}</h3>${bk.rows.map(x => `<div class="tr"><small>${e(x.c.name)}　${x.age}</small><b>${PHASE[x.key][0]}${x.ky ? '　★節目' : ''}</b></div>`).join('')}</section>`).join('');
     const growCards = charts.map(c => `<section class="gw"><small>${e(c.name)}</small><p>${growth(c)}</p></section>`).join('');
 
+    const NUM_W = [27, 31, 31, 32];
+    const NUM_IMG_W = [24, 29.7, 29, 30.7];
+    const num = i => `<span class="no" style="width:${NUM_W[i - 1]}px">${art['n' + i] ? `<img src="${art['n' + i]}" alt="${i}." style="width:${NUM_IMG_W[i - 1]}px">` : i + '.'}</span>`;
     const tipsHtml = tips.map((t, i) => `<p>${i + 1}. ${t}</p>`).join('');
     return `<!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
@@ -983,24 +986,24 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Angkor&family=Rubik+Bubbles&family=Noto+Sans+JP:wght@400;700&display=swap">
 <style>${RESULT_CSS}${cloudCss}</style></head>
 <body><main>
-<header class="top">${art.cloud ? `<img class="hc" src="${art.cloud}" alt="">` : ''}<h1>Family<br>Fortune</h1>${img('bat', 'bat')}</header>
+<header class="top">${art.cloud ? `<img class="hc" src="${art.cloud}" alt="">` : ''}<h1${art.title ? ' class="sr"' : ''}>Family<br>Fortune</h1>${art.title ? `<img class="ttl" src="${art.title}" alt="">` : ''}${img('bat', 'bat')}</header>
 <p class="warn">占いはエンタメです。科学的根拠はありません。<br>そしてAIは間違ってるかもしれません！</p>
 <div class="col">
 <div class="chips">${names.map(n => `<span>${n}</span>`).join('')}</div>
 <ol class="toc"><li>３つの占いの視点からあぶり出す個性</li><li>これから10年の流れ</li><li>これからどう育ってく？？</li><li>円満・開運ポイント</li></ol>
 <section class="lead"><p>ひとことでいうと・・・この家は・・・</p><h2>${e(r.house.title)}</h2></section>
-<section class="sec"><div class="sh"><span class="no">1.</span><h2>３つの占いからあぶり出す個性</h2></div>${people}</section>
+<section class="sec"><div class="sh">${num(1)}<h2>３つの占いからあぶり出す個性</h2></div>${people}</section>
 </div>
 <div class="gc a"><small>ここが見どころ</small><p>${facts.slice(0, 2).join('')}</p>${img('m2', 'gm m2')}</div>
-<section class="blk sec"><div class="sh"><span class="no">2.</span><h2>これから10年の流れ</h2></div>
+<section class="blk sec"><div class="sh">${num(2)}<h2>これから10年の流れ</h2></div>
 <p class="note">立春から次の立春までを1年として並べました。★は九星の節目（9年にいっぺんの区切り）です。</p>
 ${timeline}</section>
 <div class="gc b"><small>${e(peakTitle)}</small><p>${peakText}</p>${img('m3', 'gm m3')}</div>
-<section class="blk sec"><div class="sh"><span class="no">3.</span><h2>これからどう育ってく？？</h2></div>
+<section class="blk sec"><div class="sh">${num(3)}<h2>これからどう育ってく？？</h2></div>
 <section class="flow"><small>${flowHead}</small><b>${flowLine}</b><p>${flowTail}</p></section>
 ${growCards}
 <section class="caution"><small>一個だけ注意</small><p>${warnText}</p></section></section>
-<div class="blk"><div class="gc c"><div class="sh"><span class="no">4.</span><h2>円満・開運ポイント</h2></div>${tipsHtml}${img('bottom', 'gm mb')}</div>
+<div class="blk"><div class="gc c"><div class="sh">${num(4)}<h2>円満・開運ポイント</h2></div>${tipsHtml}${img('bottom', 'gm mb')}</div>
 <p class="date">${made}</p></div>
 </main></body></html>`;
   }
@@ -1014,6 +1017,8 @@ small{display:block;font-size:13px;line-height:20px;color:#656565}
 .top{position:relative;height:234px;margin:0 -20px}
 .hc{position:absolute;left:50%;margin-left:calc(-167 * var(--u));top:calc(-97 * var(--u));width:calc(347 * var(--u));height:calc(291 * var(--u))}
 .top h1{position:absolute;left:50%;margin-left:-167px;top:26px;width:347px;text-align:center;font:400 40px/44px "Rubik Bubbles","Noto Sans JP",sans-serif}
+.top h1.sr{position:absolute;left:0;top:0;margin:0;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;font-size:1px;line-height:1px}
+.ttl{position:absolute;left:50%;margin-left:-74.9px;top:31px;width:170.3px;height:auto}
 .bat{position:absolute;left:50%;margin-left:-158px;top:114px;width:124px;height:auto}
 .warn{text-align:center;color:#ff0084;font-size:14px;line-height:22px}
 .col{margin-top:46px;display:flex;flex-direction:column;gap:32px}
@@ -1026,7 +1031,7 @@ small{display:block;font-size:13px;line-height:20px;color:#656565}
 .sec{display:flex;flex-direction:column;gap:12px}
 .blk{margin-top:115px}
 .sh{display:flex;align-items:center;gap:12px;padding-left:10px;min-height:42px}
-.sh .no{font:400 30px/42px "Rubik Bubbles","Noto Sans JP",sans-serif}
+.sh .no{display:flex;align-items:center;font:400 30px/42px "Rubik Bubbles","Noto Sans JP",sans-serif}.sh .no img{height:auto;display:block}
 .sh h2{font-size:20px;line-height:28px}
 .pc{background:#1a0a3f;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:12px}
 .pc h3{color:#60e6fd;font-size:22px;line-height:29px}
